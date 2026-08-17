@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<title>Nexa – Investment Plans</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{
+    --bg:#f4f3fa; --card:#ffffff;
+    --primary:#5c3df4; --primary-dark:#4528d4; --primary-soft:#ede9ff;
+    --accent:#a78bfa; --accent-gold:#f59e0b; --text:#1a1533; --muted:#7b7694;
+    --border:#e3e0f5; --input-bg:#f8f7ff;
+    --dark-card:linear-gradient(135deg,#1e1445 0%,#3b1fa8 100%);
+    --shadow:0 8px 32px -8px rgba(92,61,244,0.18);
+    --success:#16a34a; --error:#dc2626; --warn:#d97706;
+  }
+  body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);padding-bottom:84px;min-height:100vh;
+    background-image:radial-gradient(ellipse at 20% 10%,rgba(92,61,244,0.03) 0%,transparent 50%);
+  }
+
+  .topbar{background:rgba(255,255,255,0.9);backdrop-filter:blur(10px);padding:16px 18px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;}
+  .back-btn{width:38px;height:38px;border-radius:50%;background:var(--input-bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none;color:var(--text);flex-shrink:0;transition:all 0.2s;}
+  .back-btn:hover{background:var(--primary-soft);}
+  .back-btn svg{width:18px;height:18px;}
+  .topbar h1{font-size:1.05rem;font-weight:800;}
+  .topbar p{font-size:0.75rem;color:var(--muted);}
+
+  main{padding:16px;display:flex;flex-direction:column;gap:18px;max-width:480px;margin:0 auto;}
+
+  .wallets-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .wallet-mini{background:var(--dark-card);border-radius:16px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;color:#fff;position:relative;overflow:hidden;}
+  .wallet-mini::before{content:'';position:absolute;top:-15px;right:-15px;width:50px;height:50px;border-radius:50%;background:rgba(245,158,11,0.06);}
+  .wallet-mini .wl-left{position:relative;z-index:1;}
+  .wallet-mini .wl-label{font-size:0.62rem;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:2px;}
+  .wallet-mini .wl-amt{font-size:1.05rem;font-weight:800;}
+  .wallet-mini .wl-icon{font-size:1.2rem;position:relative;z-index:1;}
+  .wallet-mini.highlight{border:2px solid rgba(167,139,250,0.4);}
+
+  .tabs{display:flex;background:var(--input-bg);border:1px solid var(--border);border-radius:14px;padding:4px;}
+  .tab{flex:1;text-align:center;padding:10px 6px;font-size:0.85rem;font-weight:700;color:var(--muted);border-radius:11px;cursor:pointer;transition:.15s;position:relative;}
+  .tab.active{background:var(--primary);color:#fff;box-shadow:0 4px 12px rgba(92,61,244,0.3);}
+  .tab .count-badge{position:absolute;top:-6px;right:6px;background:var(--error);color:#fff;font-size:0.6rem;font-weight:800;min-width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0 3px;}
+
+  #plansView{display:flex;flex-direction:column;gap:14px;}
+  .plan-card{background:var(--card);border:2px solid var(--border);border-radius:20px;overflow:hidden;transition:all 0.2s;}
+  .plan-card:hover{border-color:var(--primary);box-shadow:0 4px 16px rgba(92,61,244,0.1);}
+  .plan-head{background:var(--dark-card);padding:18px;display:flex;align-items:center;justify-content:space-between;color:#fff;}
+  .plan-head-left{display:flex;align-items:center;gap:12px;}
+  .plan-icon{width:44px;height:44px;border-radius:13px;background:rgba(167,139,250,0.22);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .plan-icon svg{width:22px;height:22px;color:var(--accent);}
+  .plan-head h3{font-size:1.05rem;font-weight:800;}
+  .plan-head .sub{font-size:0.74rem;color:rgba(255,255,255,0.6);margin-top:2px;}
+  .plan-roi-badge{background:var(--accent-gold);color:#1e1445;font-size:0.7rem;font-weight:800;padding:5px 11px;border-radius:50px;white-space:nowrap;}
+
+  .plan-body{padding:16px 18px 18px;}
+  .plan-detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+  .detail-cell{background:var(--input-bg);border-radius:12px;padding:10px 8px;text-align:center;}
+  .detail-cell .l{font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:3px;}
+  .detail-cell .v{font-size:0.88rem;font-weight:800;color:var(--text);}
+  .detail-cell .v.accent{color:var(--primary);}
+  .plan-extra-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:0.8rem;border-top:1px dashed var(--border);}
+  .plan-extra-row .l{color:var(--muted);display:flex;align-items:center;gap:6px;}
+  .plan-extra-row .l svg{width:13px;height:13px;color:var(--primary);}
+  .plan-extra-row .v{font-weight:700;color:var(--text);text-align:right;}
+  .plan-limit-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:0.75rem;border-top:1px dashed var(--border);}
+  .plan-limit-row .l{color:var(--muted);}
+  .plan-limit-row .v{font-weight:700;color:var(--text);}
+
+  .btn-buy{width:100%;margin-top:14px;padding:14px;background:var(--primary);color:#fff;font-family:inherit;font-size:0.95rem;font-weight:700;border:none;border-radius:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s;box-shadow:0 4px 12px rgba(92,61,244,0.3);}
+  .btn-buy:hover{background:var(--primary-dark);transform:translateY(-1px);}
+  .btn-buy:disabled{opacity:0.5;cursor:not-allowed;transform:none;background:#9ca3af;box-shadow:none;}
+  .btn-buy svg{width:17px;height:17px;}
+
+  #activeView{display:none;flex-direction:column;gap:14px;}
+  .active-card{background:var(--card);border:2px solid var(--border);border-radius:20px;overflow:hidden;transition:all 0.2s;}
+  .active-card.locked{border-color:var(--warn);background:#fffdf5;}
+  .active-card.completed{border-color:#0d9488;background:#f0fdfa;}
+  .active-head{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;background:var(--input-bg);border-bottom:1px solid var(--border);}
+  .active-head h3{font-size:0.92rem;font-weight:700;display:flex;align-items:center;gap:8px;}
+  .plan-badge{font-size:0.62rem;font-weight:700;padding:3px 8px;border-radius:50px;}
+  .plan-badge.locked{background:#fef3c7;color:#92400e;}
+  .plan-badge.completed{background:#ccfbf1;color:#0f766e;}
+  .plan-badge.active{background:#dcfce7;color:#15803d;}
+  .status-pill{font-size:0.68rem;font-weight:700;padding:4px 10px;border-radius:50px;}
+  .status-pill.running{background:#dcfce7;color:#15803d;}
+  .status-pill.done{background:var(--primary-soft);color:var(--primary-dark);}
+  .status-pill.frozen{background:#fef3c7;color:#92400e;}
+
+  .active-body{padding:16px;}
+  .active-info{display:flex;justify-content:space-between;font-size:0.76rem;color:var(--muted);margin-bottom:12px;}
+  .active-info b{color:var(--text);}
+  .phase-info{background:var(--input-bg);border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:8px;font-size:0.78rem;font-weight:600;}
+  .phase-info.capital{color:#15803d;background:#dcfce7;}
+  .phase-info.profit{color:#059669;background:#d1fae5;}
+  .phase-info.locked{background:#fef3c7;color:#92400e;}
+  .phase-info svg{width:16px;height:16px;flex-shrink:0;}
+  .progress-bar{height:8px;background:var(--input-bg);border-radius:50px;overflow:hidden;margin-bottom:8px;}
+  .progress-fill{height:100%;border-radius:50px;transition:width .3s;}
+  .progress-fill.capital-phase{background:var(--primary);}
+  .progress-fill.profit-phase{background:var(--success);}
+  .active-stats{display:flex;justify-content:space-between;font-size:0.78rem;color:var(--muted);margin-bottom:14px;}
+  .active-stats b{color:var(--text);}
+
+  .countdown-box{background:var(--dark-card);border-radius:14px;padding:14px;text-align:center;color:#fff;transition:background 0.3s;}
+  .countdown-box .cd-label{font-size:0.74rem;color:rgba(255,255,255,0.65);margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:6px;}
+  .countdown-box .cd-label svg{width:14px;height:14px;}
+  .countdown-display{font-size:1.6rem;font-weight:800;letter-spacing:2px;font-variant-numeric:tabular-nums;}
+  .countdown-box.weekend{background:var(--input-bg);border:1px solid var(--border);}
+  .countdown-box.weekend .cd-label,.countdown-box.weekend .countdown-display{color:var(--muted);}
+  .countdown-box.complete{background:var(--input-bg);border:1px solid var(--border);}
+  .countdown-box.complete .cd-label{color:var(--muted);}
+  .countdown-box.complete .countdown-display{color:var(--primary);font-size:1.1rem;}
+  .countdown-sub{font-size:0.68rem;color:rgba(255,255,255,0.45);margin-top:4px;}
+
+  .lock-warning{display:flex;align-items:center;gap:8px;background:#fef3c7;border:1px solid #fde68a;border-radius:12px;padding:10px 14px;margin-top:12px;font-size:0.76rem;color:#92400e;font-weight:600;}
+  .lock-warning svg{width:16px;height:16px;flex-shrink:0;}
+
+  .empty-state{text-align:center;padding:50px 20px;color:var(--muted);}
+  .empty-state svg{width:48px;height:48px;color:var(--border);margin-bottom:12px;}
+  .empty-state p{font-size:0.88rem;}
+
+  /* Toast Notifications */
+  .toast-container{position:fixed;top:20px;right:20px;z-index:1000;display:flex;flex-direction:column;gap:10px;max-width:350px;}
+  .toast{background:var(--card);border-radius:12px;padding:14px 16px;box-shadow:0 8px 24px rgba(0,0,0,0.15);display:flex;align-items:center;gap:12px;animation:slideIn 0.3s ease;border-left:4px solid;}
+  .toast.success{border-left-color:var(--success);}
+  .toast.error{border-left-color:var(--error);}
+  .toast.info{border-left-color:var(--primary);}
+  .toast.warning{border-left-color:var(--accent-gold);}
+  @keyframes slideIn{from{transform:translateX(100%);opacity:0;}to{transform:translateX(0);opacity:1;}}
+  @keyframes slideOut{from{transform:translateX(0);opacity:1;}to{transform:translateX(100%);opacity:0;}}
+  .toast-icon{width:24px;height:24px;flex-shrink:0;}
+  .toast-content{flex:1;}
+  .toast-title{font-weight:700;font-size:0.9rem;color:var(--text);margin-bottom:2px;}
+  .toast-message{font-size:0.85rem;color:var(--muted);}
+  .toast-close{background:none;border:none;cursor:pointer;color:var(--muted);padding:4px;flex-shrink:0;}
+
+  .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-top:1px solid var(--border);display:flex;z-index:30;padding:8px 4px calc(8px + env(safe-area-inset-bottom));}
+  .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;color:var(--muted);padding:6px 0;transition:color 0.2s;}
+  .nav-item:hover{color:var(--primary);}
+  .nav-item svg{width:22px;height:22px;}
+  .nav-item span{font-size:0.7rem;font-weight:600;}
+  .nav-item.active{color:var(--primary);}
+  .nav-item.active .nav-icon-wrap{background:var(--primary);border-radius:10px;width:38px;height:30px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(92,61,244,0.3);}
+  .nav-item.active .nav-icon-wrap svg{color:#fff;width:18px;height:18px;}
+  .nav-icon-wrap{display:flex;align-items:center;justify-content:center;height:30px;}
+
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(20,12,50,0.6);backdrop-filter:blur(6px);z-index:100;align-items:center;justify-content:center;padding:20px;}
+  .modal-overlay.show{display:flex;}
+  .modal{background:var(--card);border-radius:24px;padding:28px 22px 22px;max-width:380px;width:100%;box-shadow:0 20px 60px rgba(92,61,244,0.3);animation:modalIn .3s ease;max-height:85vh;overflow-y:auto;}
+  @keyframes modalIn{from{opacity:0;transform:scale(.9) translateY(16px)}to{opacity:1;transform:scale(1) translateY(0)}}
+  .alert-modal{text-align:center;}
+  .modal-icon{width:64px;height:64px;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;}
+  .modal-icon.success{background:#dcfce7;} .modal-icon.error{background:#fee2e2;} .modal-icon.info{background:var(--primary-soft);} .modal-icon.warn{background:#fef3c7;}
+  .modal-icon svg{width:30px;height:30px;}
+  .alert-modal h3{font-size:1.15rem;font-weight:800;margin-bottom:8px;}
+  .alert-modal p{font-size:0.9rem;color:var(--muted);line-height:1.5;margin-bottom:20px;}
+  .modal-btn{width:100%;padding:14px;border:none;border-radius:13px;font-family:inherit;font-size:0.95rem;font-weight:700;cursor:pointer;background:var(--primary);color:#fff;}
+  .modal-btn:hover{background:var(--primary-dark);}
+  .modal-btn.ghost{background:var(--input-bg);color:var(--muted);border:1.5px solid var(--border);margin-top:10px;}
+  
+  .confirm-header{display:flex;align-items:center;gap:12px;margin-bottom:18px;}
+  .confirm-icon{width:48px;height:48px;border-radius:14px;background:var(--primary-soft);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .confirm-icon svg{width:22px;height:22px;color:var(--primary);}
+  .confirm-header h3{font-size:1.1rem;font-weight:700;}
+  .confirm-header p{font-size:0.78rem;color:var(--muted);}
+  .confirm-rows{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+  .confirm-row{display:flex;justify-content:space-between;background:var(--input-bg);border:1px solid var(--border);border-radius:12px;padding:11px 14px;}
+  .confirm-row .l{font-size:0.83rem;color:var(--muted);}
+  .confirm-row .v{font-size:0.83rem;font-weight:700;color:var(--text);}
+  .confirm-row .v.highlight{color:var(--primary);}
+  .balance-check{border-radius:13px;padding:13px 14px;margin-bottom:18px;display:flex;flex-direction:column;gap:8px;}
+  .balance-check.ok{background:#dcfce7;border:1px solid #bbf7d0;}
+  .balance-check.low{background:#fee2e2;border:1px solid #fecaca;}
+  .bc-row{display:flex;justify-content:space-between;font-size:0.81rem;}
+  .bc-row .l{color:#555;}
+  .bc-row .v{font-weight:700;}
+  .balance-check.ok .bc-row .v{color:#15803d;}
+  .balance-check.low .bc-row .v{color:#b91c1c;}
+  .bc-divider{border-top:1px dashed rgba(0,0,0,0.12);margin:2px 0;}
+  .bc-status{display:flex;align-items:center;gap:6px;font-size:0.8rem;font-weight:700;}
+  .balance-check.ok .bc-status{color:#15803d;}
+  .balance-check.low .bc-status{color:#b91c1c;}
+  .bc-status svg{width:15px;height:15px;}
+  .confirm-actions{display:flex;gap:10px;}
+  .confirm-actions button{flex:1;}
+  .spinner{width:20px;height:20px;border:2.5px solid rgba(255,255,255,0.35);border-top-color:#fff;border-radius:50%;animation:spin 600ms linear infinite;display:none;margin:0 auto;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  
+  @media(max-width:480px){
+    .toast-container{left:20px;right:20px;max-width:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="dashboard.html" class="back-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="15 18 9 12 15 6"/></svg></a>
+  <div><h1>Investment Plans</h1><p>Max 2 active investments</p></div>
+</div>
+
+<main>
+  <div class="wallets-row">
+    <div class="wallet-mini highlight"><div class="wl-left"><div class="wl-label">💰 Deposit Wallet</div><div class="wl-amt">$<span id="depositWallet">0.00</span></div></div><div class="wl-icon">💰</div></div>
+    <div class="wallet-mini"><div class="wl-left"><div class="wl-label">💸 Withdrawal Wallet</div><div class="wl-amt">$<span id="withdrawalWallet">0.00</span></div></div><div class="wl-icon">💸</div></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" id="tabPlans" onclick="switchTab('plans')">All Plans</div>
+    <div class="tab" id="tabActive" onclick="switchTab('active')">My Investments <span class="count-badge" id="activeCountBadge" style="display:none;">0</span></div>
+  </div>
+
+  <div id="plansView"></div>
+  <div id="activeView">
+    <div class="empty-state" id="emptyState">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/></svg>
+      <p>No active investments yet.<br>Pick a plan above to get started.</p>
+    </div>
+    <div id="activeList"></div>
+  </div>
+</main>
+
+<nav class="bottom-nav">
+  <a href="dashboard.html" class="nav-item"><div class="nav-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div><span>Home</span></a>
+  <a href="investment.html" class="nav-item active"><div class="nav-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/></svg></div><span>Orders</span></a>
+  <a href="history.html" class="nav-item"><div class="nav-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg></div><span>History</span></a>
+  <a href="profile.html" class="nav-item"><div class="nav-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/></svg></div><span>Account</span></a>
+</nav>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="modal-overlay" id="modalOverlay"><div class="modal alert-modal"><div class="modal-icon" id="modalIcon"></div><h3 id="modalTitle"></h3><p id="modalMsg"></p><button class="modal-btn" onclick="closeModal()">OK</button></div></div>
+<div class="modal-overlay" id="confirmModal"><div class="modal"><div class="confirm-header"><div class="confirm-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/></svg></div><div><h3 id="confirmPlanName">Confirm Purchase</h3><p>Deducted from Deposit Wallet · ROI to Withdrawal Wallet</p></div></div><div class="confirm-rows"><div class="confirm-row"><span class="l">Plan</span><span class="v" id="confirmPlan">—</span></div><div class="confirm-row"><span class="l">Amount</span><span class="v highlight">$<span id="confirmAmount">0</span></span></div><div class="confirm-row"><span class="l">Daily ROI</span><span class="v highlight">$<span id="confirmDaily">0</span></span></div><div class="confirm-row"><span class="l">Duration</span><span class="v">20 days (Mon-Fri payouts)</span></div></div><div class="balance-check" id="balanceCheck"><div class="bc-row"><span class="l">Plan cost</span><span class="v" id="bcCost">$0</span></div><div class="bc-row"><span class="l">Deposit Wallet</span><span class="v" id="bcBalance">$0</span></div><div class="bc-divider"></div><div class="bc-status" id="bcStatus"></div></div><div class="confirm-actions"><button class="modal-btn ghost" onclick="closeConfirm()">Cancel</button><button class="modal-btn" id="confirmBtn"><span id="confirmBtnText">Activate Plan</span><div class="spinner" id="confirmSpinner"></div></button></div></div></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, getDoc, updateDoc, increment, serverTimestamp, collection, addDoc, query, where, getDocs, writeBatch, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  // ✅ UPDATED FIREBASE CONFIG
+  const firebaseConfig = {
+    apiKey: "AIzaSyAXVLeBN6rROvG6tEUN5WD8X1SZ4hatBxA",
+    authDomain: "nexa-co.firebaseapp.com",
+    projectId: "nexa-co",
+    storageBucket: "nexa-co.firebasestorage.app",
+    messagingSenderId: "345722583751",
+    appId: "1:345722583751:web:b987628aa77bce38629ce2"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // Toast notification system
+  function showToast(type, title, message, duration = 4000) {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    const icons = {
+      success: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`,
+      error: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+      info: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#5c3df4" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+      warning: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`
+    };
+    
+    toast.innerHTML = `
+      ${icons[type] || icons.info}
+      <div class="toast-content">
+        <div class="toast-title">${title}</div>
+        <div class="toast-message">${message}</div>
+      </div>
+      <button class="toast-close" onclick="this.parentElement.remove()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    `;
+    
+    container.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.style.animation = 'slideOut 0.3s ease';
+      setTimeout(() => toast.remove(), 300);
+    }, duration);
+  }
+
+  window.showToast = showToast;
+
+  const PLANS = [
+    { id:'p5', name:'Starter', amount:3.33, daily:0.33, days:20 },
+    { id:'p10', name:'Basic', amount:10.00, daily:1.00, days:20 },
+    { id:'p20', name:'Silver', amount:20.00, daily:2.00, days:20 },
+    { id:'p33', name:'Gold', amount:33.33, daily:3.33, days:20 },
+    { id:'p100', name:'Platinum', amount:100.00, daily:10.00, days:20 }
+  ];
+  const NAIRA_PRICES = { 'p5':5000, 'p10':15000, 'p20':30000, 'p33':50000, 'p100':150000 };
+  const REFERRAL_RATES = { 1: 0.10, 2: 0.02, 3: 0.01 };
+  const fmt = (n, d=2) => { const num = n||0; return d>0 ? num.toFixed(d) : Math.round(num).toLocaleString(); };
+
+  const ICONS = {
+    success:`<svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`,
+    error:`<svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+    info:`<svg viewBox="0 0 24 24" fill="none" stroke="#5c3df4" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg>`,
+    warn:`<svg viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>`
+  };
+
+  window.showModal = (type, title, msg, cb) => {
+    document.getElementById('modalIcon').className = 'modal-icon '+type;
+    document.getElementById('modalIcon').innerHTML = ICONS[type];
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalMsg').textContent = msg;
+    document.getElementById('modalOverlay').classList.add('show');
+    window._modalCb = cb||null;
+  };
+  window.closeModal = () => { document.getElementById('modalOverlay').classList.remove('show'); if(window._modalCb){window._modalCb();window._modalCb=null;} };
+  window.closeConfirm = () => document.getElementById('confirmModal').classList.remove('show');
+  window.switchTab = (t) => {
+    document.getElementById('tabPlans').classList.toggle('active',t==='plans');
+    document.getElementById('tabActive').classList.toggle('active',t==='active');
+    document.getElementById('plansView').style.display = t==='plans'?'flex':'none';
+    document.getElementById('activeView').style.display = t==='active'?'flex':'none';
+  };
+
+  function renderPlanCards(planCounts, activeCount) {
+    document.getElementById('plansView').innerHTML = PLANS.map(p => {
+      const nairaAmt = NAIRA_PRICES[p.id] || Math.round(p.amount * 1500);
+      const profit = (p.daily * p.days) - p.amount;
+      const count = planCounts[p.id] || 0;
+      const canBuy = activeCount < 2;
+      return `<div class="plan-card"><div class="plan-head"><div class="plan-head-left"><div class="plan-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/></svg></div><div><h3>${p.name} Plan</h3><div class="sub">$${fmt(p.amount)} USDT / ₦${fmt(nairaAmt,0)}</div></div></div><div class="plan-roi-badge">$${fmt(p.daily)}/day</div></div><div class="plan-body"><div class="plan-detail-grid"><div class="detail-cell"><div class="l">Daily ROI</div><div class="v accent">$${fmt(p.daily)}</div></div><div class="detail-cell"><div class="l">Duration</div><div class="v">${p.days} days</div></div><div class="detail-cell"><div class="l">Profit</div><div class="v accent">$${fmt(profit)}</div></div></div><div class="plan-extra-row"><span class="l"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/></svg>Payout to</span><span class="v">💸 Withdrawal Wallet</span></div><div class="plan-limit-row"><span class="l">Active plans</span><span class="v">${activeCount}/2</span></div><button class="btn-buy" onclick="openConfirm('${p.id}')" ${!canBuy?'disabled':''}>${canBuy?'Invest $'+fmt(p.amount):'Max 2 Plans Reached'}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button></div></div>`;
+    }).join('');
+  }
+  renderPlanCards({}, 0);
+
+  let currentUser=null, userData=null, selectedPlan=null, depositWallet=0, withdrawalWallet=0, countdownTimers={}, activePlans=[];
+
+  const CACHE_KEY = 'nexa_inv_cache';
+  function getCache(){ try{const r=sessionStorage.getItem(CACHE_KEY);if(!r)return null;const p=JSON.parse(r);if(Date.now()-p.ts>180000)return null;return p.data;}catch{return null;} }
+  function setCache(d){ try{sessionStorage.setItem(CACHE_KEY,JSON.stringify({ts:Date.now(),data:d}));}catch{} }
+
+  function updateWalletDisplays() {
+    document.getElementById('depositWallet').textContent = fmt(depositWallet);
+    document.getElementById('withdrawalWallet').textContent = fmt(withdrawalWallet);
+  }
+
+  async function refreshUserData() {
+    if (!currentUser) return;
+    try {
+      const snap = await getDoc(doc(db, 'users', currentUser.uid));
+      if (snap.exists()) { 
+        const d = snap.data(); 
+        userData = d; 
+        depositWallet = d.depositWallet ?? 0; 
+        withdrawalWallet = d.withdrawalWallet ?? 0; 
+        if (depositWallet === 0 && withdrawalWallet === 0 && (d.walletBalance ?? 0) > 0) depositWallet = d.walletBalance ?? 0; 
+        setCache(d); 
+        updateWalletDisplays(); 
+      }
+    } catch(e) {}
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    if(!user){window.location.href='login.html';return;}
+    currentUser=user;
+    let d=getCache(); 
+    if(!d){
+      const s=await getDoc(doc(db,'users',user.uid));
+      d=s.exists()?s.data():{};
+      setCache(d);
+    }
+    userData=d; 
+    depositWallet=d.depositWallet??0; 
+    withdrawalWallet=d.withdrawalWallet??0;
+    if(depositWallet===0&&withdrawalWallet===0&&(d.walletBalance??0)>0)depositWallet=d.walletBalance??0;
+    updateWalletDisplays(); 
+    await loadInvestments();
+  });
+
+  function isWeekend(){ const day=new Date().getDay(); return day===0||day===6; }
+  function getNextPayoutTime(){ const now=new Date(); if(isWeekend()){const mon=new Date(now);mon.setDate(now.getDate()+(now.getDay()===0?1:2));mon.setHours(0,0,0,0);return mon;} const midnight=new Date(now);midnight.setHours(24,0,0,0);return midnight; }
+
+  async function loadInvestments(){
+    Object.values(countdownTimers).forEach(t=>clearInterval(t.interval));
+    countdownTimers={};
+    
+    const snap=await getDocs(query(collection(db,'investments'),where('userId','==',currentUser.uid)));
+    const empty=document.getElementById('emptyState');
+    const list=document.getElementById('activeList');
+    const badge=document.getElementById('activeCountBadge');
+    
+    if(snap.empty){
+      empty.style.display='block';
+      list.innerHTML='';
+      badge.style.display='none';
+      activePlans=[];
+      updatePlanCounts();
+      return;
+    }
+    empty.style.display='none';
+    activePlans=[];
+    snap.forEach(d=>{activePlans.push({id:d.id,...d.data()});});
+    activePlans.sort((a,b)=>(a.createdAt?.toMillis?.()||0)-(b.createdAt?.toMillis?.()||0));
+    
+    let html='',runningCount=0,liveCards=[];
+    
+    for(let i=0;i<activePlans.length;i++){
+      const inv=activePlans[i];
+      const invId=inv.id;
+      const now=Date.now();
+      let daysPaid=inv.daysPaid||0;
+      const maxDays=inv.days||20;
+      let nextPayout=inv.nextPayoutAt?.toMillis?inv.nextPayoutAt.toMillis():(typeof inv.nextPayoutAt==='number'?inv.nextPayoutAt:now);
+
+      const isLocked=inv.locked===true;
+      const isCompleted=inv.status==='completed'||daysPaid>=maxDays;
+      const isRunning=!isCompleted&&!isLocked;
+      if(isRunning)runningCount++;
+      
+      const inCapitalPhase=daysPaid<15;
+      const inProfitPhase=daysPaid>=15&&daysPaid<maxDays;
+      const pct=Math.min(100,Math.round((daysPaid/maxDays)*100));
+      const purchaseDate=inv.createdAt?.toMillis?new Date(inv.createdAt.toMillis()).toLocaleDateString('en-US',{day:'numeric',month:'short',year:'numeric'}):'—';
+      
+      let cardClass='active-card';
+      if(isLocked)cardClass+=' locked';
+      else if(isCompleted)cardClass+=' completed';
+      
+      let badgeHtml='';
+      if(isCompleted)badgeHtml='<span class="plan-badge completed">✅ Completed</span>';
+      else if(isLocked)badgeHtml='<span class="plan-badge locked">🔒 Locked — Frozen at Day '+daysPaid+'</span>';
+      else badgeHtml='<span class="plan-badge active">✅ Active</span>';
+
+      let phaseHtml='';
+      if(isLocked){
+        phaseHtml=`<div class="phase-info locked"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>🔒 LOCKED — Frozen at Day ${daysPaid}/20. Admin will unlock after you buy 2nd plan.</div>`;
+      }else if(inCapitalPhase){
+        phaseHtml=`<div class="phase-info capital"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="8" width="18" height="13" rx="2"/></svg>Capital Recovery — Day ${daysPaid}/15</div>`;
+      }else if(inProfitPhase){
+        phaseHtml=`<div class="phase-info profit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>Profit Phase! 🎉 — Day ${daysPaid}/20</div>`;
+      }
+
+      let lockWarning='';
+      if(isLocked){
+        lockWarning=`<div class="lock-warning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>🔒 This plan is FROZEN at Day ${daysPaid}. Buy your 2nd plan and admin will unlock it to resume from Day ${daysPaid + 1}.</div>`;
+      }
+
+      let countdownHtml='';
+      if(isRunning){
+        if(isWeekend()){
+          countdownHtml=`<div class="countdown-box weekend"><div class="cd-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/></svg>Weekend — No payouts</div><div class="countdown-display">Monday 12AM</div></div>`;
+        } else {
+          const remaining=Math.max(0,Math.floor((nextPayout-now)/1000));
+          const h=String(Math.floor(remaining/3600)).padStart(2,'0');
+          const m=String(Math.floor((remaining%3600)/60000)).padStart(2,'0');
+          const s=String(Math.floor((remaining%60000)/1000)).padStart(2,'0');
+          countdownHtml=`<div class="countdown-box" id="cdbox-${invId}"><div class="cd-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>Next $${fmt(inv.daily)} to 💸 Withdrawal</div><div class="countdown-display" id="cdtext-${invId}">${h}:${m}:${s}</div></div>`;
+        }
+      }else if(isCompleted){
+        countdownHtml=`<div class="countdown-box complete"><div class="cd-label">✅ Completed</div><div class="countdown-display">$${fmt(inv.totalPaidOut||0)} earned</div></div>`;
+      }else if(isLocked){
+        countdownHtml=`<div class="countdown-box weekend"><div class="cd-label">🔒 Frozen</div><div class="countdown-display">Day ${daysPaid}/20</div><div class="countdown-sub">Buy 2nd plan to resume from Day ${daysPaid + 1}</div></div>`;
+      }
+
+      html+=`<div class="${cardClass}" id="card-${invId}"><div class="active-head"><h3>${inv.planName} Plan ${badgeHtml}</h3><span class="status-pill ${isLocked?'frozen':isRunning?'running':'done'}">${isLocked?'🔒 Frozen':isRunning?'▶ Running':isCompleted?'✅ Done':'⏸ Paused'}</span></div><div class="active-body"><div class="active-info"><span>Purchased: <b>${purchaseDate}</b></span><span>Daily: <b>$${fmt(inv.daily)}</b></span></div>${phaseHtml}<div class="progress-bar"><div class="progress-fill ${inProfitPhase?'profit-phase':'capital-phase'}" style="width:${pct}%"></div></div><div class="active-stats"><span>Day <b>${daysPaid}</b> / ${maxDays}</span><span>Earned <b>$${fmt(inv.totalPaidOut||0)}</b></span></div>${countdownHtml}${lockWarning}</div></div>`;
+      
+      if(isRunning)liveCards.push({invId,nextPayoutAt:nextPayout,maxDays,daysPaid,daily:inv.daily,planName:inv.planName});
+    }
+    list.innerHTML=html;
+    badge.style.display=runningCount>0?'flex':'none';
+    badge.textContent=runningCount;
+    updateWalletDisplays();
+    sessionStorage.removeItem(CACHE_KEY);
+    liveCards.forEach(c=>startCountdown(c));
+    updatePlanCounts();
+  }
+
+  function updatePlanCounts(){
+    const counts={};
+    let a=0;
+    PLANS.forEach(p=>counts[p.id]=0);
+    activePlans.forEach(p=>{
+      if(counts[p.planId]!==undefined)counts[p.planId]++;
+      if(p.status==='active'&&!p.locked&&(p.daysPaid||0)<(p.days||20))a++;
+    });
+    renderPlanCards(counts,a);
+  }
+
+  function startCountdown(card){
+    const{invId,nextPayoutAt}=card;
+    const t=document.getElementById(`cdtext-${invId}`);
+    const b=document.getElementById(`cdbox-${invId}`);
+    if(!t||!b)return;
+    countdownTimers[invId]={interval:null,locked:false};
+    function tick(){
+      const r=nextPayoutAt-Date.now();
+      if(r<=0&&!countdownTimers[invId]?.locked){
+        t.textContent='00:00:00';
+        clearInterval(countdownTimers[invId].interval);
+        countdownTimers[invId].locked=true;
+        loadInvestments();
+        return;
+      }
+      if(r>0){
+        const hh=String(Math.floor(r/3600000)).padStart(2,'0');
+        const mm=String(Math.floor((r%3600000)/60000)).padStart(2,'0');
+        const ss=String(Math.floor((r%60000)/1000)).padStart(2,'0');
+        t.textContent=`${hh}:${mm}:${ss}`;
+      }
+    }
+    tick();
+    countdownTimers[invId].interval=setInterval(tick,1000);
+  }
+
+  window.openConfirm = async (planId) => {
+    await refreshUserData();
+    selectedPlan=PLANS.find(p=>p.id===planId);
+    
+    // Check active investment count
+    const activeNonCompleted = activePlans.filter(p=>p.status==='active'||p.locked===true);
+    if(activeNonCompleted.length >= 2){
+      showToast('warning', 'Max 2 Plans', 'You already have 2 active investments. Wait for one to complete.');
+      showModal('warn','Max 2 Plans','You already have 2 active investments. Wait for one to complete before buying another.');
+      return;
+    }
+    
+    document.getElementById('confirmPlanName').textContent=`Activate ${selectedPlan.name} Plan`;
+    document.getElementById('confirmPlan').textContent=`$${fmt(selectedPlan.amount)} USDT`;
+    document.getElementById('confirmAmount').textContent=fmt(selectedPlan.amount);
+    document.getElementById('confirmDaily').textContent=fmt(selectedPlan.daily);
+    
+    const bc=document.getElementById('balanceCheck');
+    const s=document.getElementById('bcStatus');
+    const btn=document.getElementById('confirmBtn');
+    const bt=document.getElementById('confirmBtnText');
+    document.getElementById('bcCost').textContent=`$${fmt(selectedPlan.amount)}`;
+    document.getElementById('bcBalance').textContent=`$${fmt(depositWallet)}`;
+    
+    if(depositWallet>=selectedPlan.amount){
+      bc.className='balance-check ok';
+      s.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Deposit Wallet sufficient`;
+      btn.onclick=()=>confirmPurchase();
+      bt.textContent='Activate Plan';
+    }else{
+      const sf=selectedPlan.amount-depositWallet;
+      bc.className='balance-check low';
+      s.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/></svg> Need $${fmt(sf)} more`;
+      btn.onclick=()=>{window.location.href='deposit.html';};
+      bt.textContent='Go to Deposit';
+    }
+    document.getElementById('confirmModal').classList.add('show');
+  };
+
+  async function confirmPurchase(){
+    if(!selectedPlan||!currentUser)return;
+    await refreshUserData();
+    
+    const activeNonCompleted = activePlans.filter(p=>p.status==='active'||p.locked===true);
+    if(activeNonCompleted.length >= 2){
+      closeConfirm();
+      showToast('warning', 'Max 2 Plans', 'You already have 2 active investments.');
+      showModal('warn','Max Active','Already have 2 active plans.');
+      return;
+    }
+    
+    if(depositWallet<selectedPlan.amount){
+      closeConfirm();
+      showToast('error', 'Insufficient', `Deposit Wallet: $${fmt(depositWallet)}`);
+      showModal('error','Insufficient',`Deposit Wallet: $${fmt(depositWallet)}`);
+      return;
+    }
+    
+    const btn=document.getElementById('confirmBtn');
+    const bt=document.getElementById('confirmBtnText');
+    const sp=document.getElementById('confirmSpinner');
+    btn.disabled=true;
+    bt.style.display='none';
+    sp.style.display='block';
+    
+    try{
+      const uRef=doc(db,'users',currentUser.uid);
+      const result=await runTransaction(db,async(tx)=>{
+        const s=await tx.get(uRef);
+        let d=s.data().depositWallet||0;
+        const w=s.data().walletBalance||0;
+        if(d===0&&w>0&&!s.data().walletsMigrated)d=w;
+        if(d<selectedPlan.amount)throw new Error('INSUFFICIENT');
+        const u={walletBalance:w-selectedPlan.amount};
+        if(s.data().depositWallet!==undefined||s.data().walletsMigrated)u.depositWallet=d-selectedPlan.amount;
+        tx.update(uRef,u);
+        return{dBal:d-selectedPlan.amount};
+      });
+      
+      const np=getNextPayoutTime();
+      await addDoc(collection(db,'investments'),{
+        userId:currentUser.uid,
+        planId:selectedPlan.id,
+        planName:selectedPlan.name,
+        amount:selectedPlan.amount,
+        daily:selectedPlan.daily,
+        days:selectedPlan.days,
+        daysPaid:0,
+        totalPaidOut:0,
+        status:'active',
+        locked:false,
+        nextPayoutAt:np,
+        createdAt:serverTimestamp(),
+        lastPayoutDate:null,
+        sourceWallet:'depositWallet'
+      });
+      
+      // ✅ Referral bonus ONLY on first purchase
+      await distributeReferral();
+      
+      sessionStorage.removeItem(CACHE_KEY);
+      depositWallet=result.dBal;
+      updateWalletDisplays();
+      
+      const msg=`${selectedPlan.name} Plan is live! $${fmt(selectedPlan.daily)}/day drops to Withdrawal Wallet.`;
+      closeConfirm();
+      showToast('success', 'Activated! 🎉', msg);
+      showModal('success','Activated! 🎉',msg);
+      switchTab('active');
+      await loadInvestments();
+    }catch(err){
+      closeConfirm();
+      if(err.message==='INSUFFICIENT'){
+        showToast('error', 'Balance Changed', 'Try again.');
+        showModal('error','Balance Changed','Try again.');
+      }else{
+        showToast('error', 'Failed', 'Something went wrong.');
+        showModal('error','Failed','Something went wrong.');
+      }
+    }finally{
+      btn.disabled=false;
+      bt.style.display='inline';
+      sp.style.display='none';
+    }
+  }
+
+  // ✅ Referral bonus ONLY on first purchase
+  async function distributeReferral(){
+    if(!userData||userData.referralBonusGiven===true)return;
+    
+    const pa=selectedPlan.amount;
+    let uid=userData.referredBy||null;
+    
+    if(!uid){
+      try{await updateDoc(doc(db,'users',currentUser.uid),{referralBonusGiven:true});}catch{}
+      return;
+    }
+    
+    const batch=writeBatch(db);
+    let distributed=false;
+    
+    for(let l=1;l<=3&&uid;l++){
+      let s;
+      try{s=await getDoc(doc(db,'users',uid));}catch{break;}
+      if(!s.exists())break;
+      
+      const dt=s.data();
+      const rate=REFERRAL_RATES[l];
+      const bonus=Math.round(pa*rate*100)/100;
+      
+      if(bonus>0){
+        distributed=true;
+        batch.update(doc(db,'users',uid),{
+          withdrawalWallet:increment(bonus),
+          walletBalance:increment(bonus),
+          referralEarnings:increment(bonus)
+        });
+        batch.set(doc(collection(db,'referralLogs')),{
+          uplineId:uid,
+          fromUserId:currentUser.uid,
+          fromUserEmail:currentUser.email||'',
+          level:l,
+          rate,
+          planAmount:pa,
+          planId:selectedPlan.id,
+          planName:selectedPlan.name,
+          bonus,
+          createdAt:serverTimestamp()
+        });
+      }
+      uid=dt.referredBy||null;
+    }
+    
+    if(distributed){
+      batch.update(doc(db,'users',currentUser.uid),{referralBonusGiven:true});
+      showToast('success', 'Referral Bonus', 'Referral bonuses distributed to your upline!');
+    }
+    
+    try{await batch.commit();}catch(e){console.error('Referral distribution error:',e);}
+  }
+
+  setInterval(async()=>{
+    if(currentUser)await loadInvestments();
+  },60000);
+</script>
+</body>
+</html>

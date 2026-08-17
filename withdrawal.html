@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<title>Nexa – Withdraw</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{
+    --bg:#f4f3fa; --card:#ffffff;
+    --primary:#5c3df4; --primary-dark:#4528d4; --primary-soft:#ede9ff;
+    --accent:#a78bfa; --accent-gold:#f59e0b; --text:#1a1533; --muted:#7b7694;
+    --border:#e3e0f5; --input-bg:#f8f7ff;
+    --dark-card:linear-gradient(135deg,#1e1445 0%,#3b1fa8 100%);
+    --success:#16a34a; --error:#dc2626; --warn:#d97706;
+  }
+  body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:40px;}
+
+  .topbar{background:rgba(255,255,255,0.9);backdrop-filter:blur(10px);padding:16px 18px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;}
+  .back-btn{width:38px;height:38px;border-radius:50%;background:var(--input-bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none;color:var(--text);flex-shrink:0;}
+  .back-btn svg{width:18px;height:18px;}
+  .topbar h1{font-size:1.05rem;font-weight:800;}
+
+  main{padding:16px;max-width:480px;margin:0 auto;display:flex;flex-direction:column;gap:14px;}
+
+  .wallet-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .wallet-box{background:var(--dark-card);border-radius:14px;padding:14px;color:#fff;text-align:center;}
+  .wallet-box .wl{font-size:0.6rem;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:4px;}
+  .wallet-box .wa{font-size:1.1rem;font-weight:800;}
+  .wallet-box.active{border:2px solid rgba(34,197,94,0.4);}
+
+  .warning-box{display:none;align-items:center;gap:8px;background:#fef3c7;border:1px solid #fde68a;border-radius:12px;padding:12px 14px;font-size:0.82rem;color:#92400e;font-weight:600;}
+  .warning-box.show{display:flex;}
+  .warning-box svg{width:18px;height:18px;flex-shrink:0;color:var(--warn);}
+
+  .rules-box{background:var(--primary-soft);border:1px solid #ddd6fe;border-radius:12px;padding:12px 14px;font-size:0.78rem;color:var(--primary-dark);font-weight:600;display:flex;flex-direction:column;gap:6px;}
+  .rules-box span{display:flex;align-items:center;gap:6px;}
+  .rules-box svg{width:14px;height:14px;flex-shrink:0;}
+
+  .type-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .type-tab{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:14px 6px;text-align:center;cursor:pointer;font-size:0.75rem;font-weight:700;}
+  .type-tab.selected{border-color:var(--primary);background:var(--primary-soft);}
+  .type-tab .icon{font-size:1.3rem;margin-bottom:4px;}
+  .type-tab .fee{font-size:0.6rem;padding:2px 7px;border-radius:50px;display:inline-block;margin-top:3px;}
+  .type-tab .fee.charge{background:#fef3c7;color:#92400e;}
+
+  .form-box{background:var(--card);border:1.5px solid var(--border);border-radius:18px;padding:18px;display:none;}
+  .form-box.show{display:block;}
+  .form-box h3{font-size:0.95rem;font-weight:700;margin-bottom:12px;}
+
+  .field{margin-bottom:12px;}
+  .field label{display:block;font-size:0.75rem;font-weight:600;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.3px;}
+  .field input,.field select{width:100%;height:48px;background:var(--input-bg);border:2px solid var(--border);border-radius:12px;padding:0 12px;font-family:inherit;font-size:0.9rem;color:var(--text);outline:none;}
+  .field input:focus,.field select:focus{border-color:var(--primary);}
+  .amt-field{position:relative;}
+  .amt-field .pfx{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-weight:700;color:var(--primary);}
+  .amt-field input{padding-left:28px;}
+
+  .breakdown{background:var(--input-bg);border-radius:12px;padding:12px;margin-bottom:12px;display:none;}
+  .breakdown.show{display:block;}
+  .breakdown .br{display:flex;justify-content:space-between;padding:4px 0;font-size:0.82rem;}
+  .breakdown .br .bl{color:var(--muted);}.breakdown .br .bv{font-weight:700;}
+  .breakdown .br.total{border-top:1px dashed var(--border);margin-top:4px;padding-top:8px;}
+  .breakdown .br.total .bv{color:var(--primary);font-size:0.95rem;}
+
+  .submit-btn{width:100%;height:52px;background:var(--primary);color:#fff;font-family:inherit;font-size:0.95rem;font-weight:700;border:none;border-radius:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .submit-btn:disabled{opacity:0.5;cursor:not-allowed;}
+  .submit-btn .spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:none;}
+  .submit-btn.loading .spinner{display:block;}
+  .submit-btn.loading .btn-text{display:none;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* Toast Notifications */
+  .toast-container{position:fixed;top:20px;right:20px;z-index:1000;display:flex;flex-direction:column;gap:10px;max-width:350px;}
+  .toast{background:var(--card);border-radius:12px;padding:14px 16px;box-shadow:0 8px 24px rgba(0,0,0,0.15);display:flex;align-items:center;gap:12px;animation:slideIn 0.3s ease;border-left:4px solid;position:relative;overflow:hidden;}
+  .toast.success{border-left-color:var(--success);}
+  .toast.error{border-left-color:var(--error);}
+  .toast.info{border-left-color:var(--primary);}
+  .toast.warning{border-left-color:var(--accent-gold);}
+  @keyframes slideIn{from{transform:translateX(100%);opacity:0;}to{transform:translateX(0);opacity:1;}}
+  @keyframes slideOut{from{transform:translateX(0);opacity:1;}to{transform:translateX(100%);opacity:0;}}
+  .toast-icon{width:24px;height:24px;flex-shrink:0;}
+  .toast-content{flex:1;}
+  .toast-title{font-weight:700;font-size:0.9rem;color:var(--text);margin-bottom:2px;}
+  .toast-message{font-size:0.85rem;color:var(--muted);}
+  .toast-close{background:none;border:none;cursor:pointer;color:var(--muted);padding:4px;flex-shrink:0;}
+
+  /* Result Overlay */
+  .result-overlay{display:none;position:fixed;inset:0;background:rgba(20,12,50,0.7);backdrop-filter:blur(8px);z-index:100;align-items:center;justify-content:center;padding:20px;}
+  .result-overlay.show{display:flex;}
+  .result-card{background:var(--card);border-radius:24px;padding:32px 24px 24px;max-width:360px;width:100%;text-align:center;animation:pop .4s ease;}
+  @keyframes pop{from{opacity:0;transform:scale(.8) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+  .result-card .icon-circle{width:72px;height:72px;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;}
+  .result-card .icon-circle.success{background:#dcfce7;}
+  .result-card .icon-circle.error{background:#fee2e2;}
+  .result-card .icon-circle svg{width:34px;height:34px;}
+  .result-card h2{font-size:1.2rem;font-weight:800;margin-bottom:8px;}
+  .result-card p{font-size:0.88rem;color:var(--muted);line-height:1.6;margin-bottom:20px;white-space:pre-line;}
+  .result-card button{width:100%;padding:14px;border:none;border-radius:13px;font-family:inherit;font-size:0.95rem;font-weight:700;cursor:pointer;background:var(--primary);color:#fff;}
+  .result-card button.success-btn{background:var(--success);}
+
+  @media(max-width:480px){
+    .toast-container{left:20px;right:20px;max-width:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="dashboard.html" class="back-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="15 18 9 12 15 6"/></svg></a>
+  <div><h1>Withdraw Funds</h1></div>
+</div>
+
+<main>
+
+  <div class="wallet-row">
+    <div class="wallet-box"><div class="wl">💰 Deposit</div><div class="wa">$<span id="depW">0.00</span></div></div>
+    <div class="wallet-box active"><div class="wl">💸 Withdrawal</div><div class="wa">$<span id="wdW">0.00</span></div></div>
+  </div>
+
+  <div class="rules-box">
+    <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Mon–Sat, 8AM–5PM · 15% fee · Min $1.00</span>
+    <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg> 1 withdrawal per day · No stacking pending requests</span>
+  </div>
+
+  <div class="warning-box" id="warnNoPlan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg><span>You need an active investment plan. <a href="investment.html" style="color:#92400e;">Get one →</a></span></div>
+  <div class="warning-box" id="warnPending"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg><span>Pending: <strong id="pendAmt"></strong>. Wait for approval.</span></div>
+  <div class="warning-box" id="warnToday"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/></svg><span>Already withdrawn today. Come back tomorrow.</span></div>
+  <div class="warning-box" id="warnTime"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>8AM–5PM Mon–Sat. Current: <strong id="timeNow"></strong></span></div>
+
+  <p style="font-weight:700;font-size:0.95rem;">Select method</p>
+  <div class="type-tabs">
+    <div class="type-tab selected" id="tabWallet" onclick="pickType('wallet')"><div class="icon">💎</div>USDT Wallet<div class="fee charge">15% fee</div></div>
+    <div class="type-tab" id="tabBank" onclick="pickType('bank')"><div class="icon">🏦</div>Bank Transfer<div class="fee charge">15% fee</div></div>
+  </div>
+
+  <!-- USDT WALLET -->
+  <div class="form-box show" id="fWallet">
+    <h3>USDT Wallet Withdrawal</h3>
+    <p style="font-size:0.78rem;color:var(--muted);margin-bottom:12px;">Deducted from 💸 Withdrawal Wallet · 15% fee · BEP20 Network</p>
+    <div class="field amt-field"><label>Amount ($1.00 min)</label><span class="pfx">$</span><input type="number" id="amtW" placeholder="1.00" min="1" step="0.01"></div>
+    <p style="font-size:0.72rem;color:var(--muted);margin:-8px 0 8px;">Balance: $<span id="balW">0.00</span></p>
+    <div class="breakdown" id="bdW"><div class="br"><span class="bl">Amount</span><span class="bv">$<span id="bdAmtW">0.00</span></span></div><div class="br"><span class="bl">Fee (15%)</span><span class="bv">-$<span id="bdFeeW">0.00</span></span></div><div class="br total"><span class="bl">You get</span><span class="bv" style="color:var(--success);">$<span id="bdNetW">0.00</span></span></div></div>
+    <div class="field"><label>BEP20 Address</label><input type="text" id="addrW" placeholder="Your USDT wallet address (BEP20)"></div>
+    <button class="submit-btn" id="btnW" disabled>
+      <span class="btn-text">Request Withdrawal</span>
+      <div class="spinner"></div>
+    </button>
+  </div>
+
+  <!-- BANK -->
+  <div class="form-box" id="fBank">
+    <h3>Bank Transfer (USD→NGN)</h3>
+    <p style="font-size:0.78rem;color:var(--muted);margin-bottom:12px;">Deducted from 💸 Withdrawal Wallet · 15% fee · ₦1,500/$</p>
+    <div class="field amt-field"><label>Amount ($1.00 min)</label><span class="pfx">$</span><input type="number" id="amtB" placeholder="1.00" min="1" step="0.01"></div>
+    <p style="font-size:0.72rem;color:var(--muted);margin:-8px 0 8px;">Balance: $<span id="balB">0.00</span></p>
+    <div class="breakdown" id="bdB"><div class="br"><span class="bl">Amount</span><span class="bv">$<span id="bdAmtB">0.00</span></span></div><div class="br"><span class="bl">Naira value</span><span class="bv">₦<span id="bdNgnB">0</span></span></div><div class="br"><span class="bl">Fee (15%)</span><span class="bv">-$<span id="bdFeeB">0.00</span></span></div><div class="br total"><span class="bl">You get</span><span class="bv" style="color:var(--success);">₦<span id="bdNetB">0</span></span></div></div>
+    <div class="field"><label>Bank</label><select id="bankB"><option value="">Select bank</option></select></div>
+    <div class="field"><label>Account Number</label><input type="text" id="acctB" placeholder="10 digits" maxlength="10"></div>
+    <div class="field"><label>Account Name</label><input type="text" id="nameB" placeholder="Your full name"></div>
+    <button class="submit-btn" id="btnB" disabled>
+      <span class="btn-text">Request Withdrawal</span>
+      <div class="spinner"></div>
+    </button>
+  </div>
+
+</main>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- RESULT OVERLAY -->
+<div class="result-overlay" id="resultOverlay">
+  <div class="result-card">
+    <div class="icon-circle" id="resultIcon"></div>
+    <h2 id="resultTitle"></h2>
+    <p id="resultMsg"></p>
+    <button id="resultBtn"></button>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  // ✅ UPDATED FIREBASE CONFIG
+  const firebaseConfig = {
+    apiKey: "AIzaSyAXVLeBN6rROvG6tEUN5WD8X1SZ4hatBxA",
+    authDomain: "nexa-co.firebaseapp.com",
+    projectId: "nexa-co",
+    storageBucket: "nexa-co.firebasestorage.app",
+    messagingSenderId: "345722583751",
+    appId: "1:345722583751:web:b987628aa77bce38629ce2"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // Toast notification system
+  function showToast(type, title, message, duration = 4000) {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    const icons = {
+      success: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`,
+      error: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+      info: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#5c3df4" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+      warning: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`
+    };
+    
+    toast.innerHTML = `
+      ${icons[type] || icons.info}
+      <div class="toast-content">
+        <div class="toast-title">${title}</div>
+        <div class="toast-message">${message}</div>
+      </div>
+      <button class="toast-close" onclick="this.parentElement.remove()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    `;
+    
+    container.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.style.animation = 'slideOut 0.3s ease';
+      setTimeout(() => toast.remove(), 300);
+    }, duration);
+  }
+
+  window.showToast = showToast;
+
+  const BANKS = ["Access Bank","Access Bank (Diamond)","Carbon","Citibank Nigeria","Coronation Merchant Bank","Ecobank Nigeria","FairMoney MFB","Fidelity Bank","First Bank of Nigeria","First City Monument Bank (FCMB)","FSDH Merchant Bank","Globus Bank","Gowry MFB","Greenwich Merchant Bank","Guaranty Trust Bank (GTBank)","Heritage Bank","Jaiz Bank","Keystone Bank","Kuda Bank","Lotus Bank","Mint Finex MFB","Moniepoint MFB","Nova Merchant Bank","Opay","Optimus Bank","Palmpay","Parallex Bank","Polaris Bank","Premium Trust Bank","Providus Bank","Rand Merchant Bank","Rubies MFB","Signature Bank","Sparkle MFB","Stanbic IBTC Bank","Standard Chartered Bank","Sterling Bank","SunTrust Bank","Taj Bank","Titan Trust Bank","UBA Microfinance Bank","Union Bank of Nigeria","United Bank for Africa (UBA)","Unity Bank","VFD Microfinance Bank","Wema Bank","Zenith Bank","9mobile PSB","MTN MoMo PSB","Hope PSB","SmartCash PSB"];
+
+  const ff = n => Math.round(n||0).toLocaleString();
+  const fu = n => (n||0).toFixed(2);
+
+  let U = null, wdW = 0, dpW = 0, tp = 'wallet';
+  let hasPlan = false, hasPend = false, hasToday = false, inWindow = false;
+
+  // Bank dropdown
+  document.getElementById('bankB').innerHTML = '<option value="">Select bank</option>' + BANKS.map(b => `<option>${b}</option>`).join('');
+
+  // ════════ RESULT OVERLAY ════════
+  function showResult(type, title, msg, btnText, callback) {
+    const overlay = document.getElementById('resultOverlay');
+    const icon = document.getElementById('resultIcon');
+    const btn = document.getElementById('resultBtn');
+
+    icon.className = 'icon-circle ' + (type === 'success' ? 'success' : 'error');
+    icon.innerHTML = type === 'success'
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>'
+      : '<svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+
+    document.getElementById('resultTitle').textContent = title;
+    document.getElementById('resultMsg').textContent = msg;
+    btn.textContent = btnText;
+    btn.className = type === 'success' ? 'success-btn' : '';
+    btn.onclick = () => { overlay.classList.remove('show'); if (callback) callback(); };
+
+    overlay.classList.add('show');
+  }
+
+  // ════════ DATA ════════
+  async function refresh() {
+    if (!U) return;
+    const s = await getDoc(doc(db, 'users', U.uid));
+    if (s.exists()) {
+      const dt = s.data();
+      dpW = dt.depositWallet ?? 0;
+      wdW = dt.withdrawalWallet ?? 0;
+    }
+    updateUI();
+  }
+
+  function updateUI() {
+    document.getElementById('depW').textContent = fu(dpW);
+    document.getElementById('wdW').textContent = fu(wdW);
+    document.getElementById('balW').textContent = fu(wdW);
+    document.getElementById('balB').textContent = fu(wdW);
+    if (tp === 'wallet') valW();
+    if (tp === 'bank') valB();
+  }
+
+  function checkTime() {
+    const n = new Date();
+    inWindow = n.getDay() >= 1 && n.getDay() <= 6 && n.getHours() >= 8 && n.getHours() < 17;
+    document.getElementById('timeNow').textContent = n.toLocaleTimeString('en-NG', { hour:'2-digit', minute:'2-digit' });
+  }
+
+  function isToday(ts) {
+    if (!ts) return false;
+    const d = ts.toDate ? ts.toDate() : new Date(ts);
+    const n = new Date();
+    return d.getFullYear() === n.getFullYear() && d.getMonth() === n.getMonth() && d.getDate() === n.getDate();
+  }
+
+  function updWarn() {
+    document.getElementById('warnNoPlan').classList.toggle('show', !hasPlan);
+    document.getElementById('warnPending').classList.toggle('show', hasPend);
+    document.getElementById('warnToday').classList.toggle('show', hasToday);
+    document.getElementById('warnTime').classList.toggle('show', !inWindow);
+  }
+
+  window.pickType = (t) => {
+    tp = t;
+    document.getElementById('tabWallet').classList.toggle('selected', t==='wallet');
+    document.getElementById('tabBank').classList.toggle('selected', t==='bank');
+    document.getElementById('fWallet').classList.toggle('show', t==='wallet');
+    document.getElementById('fBank').classList.toggle('show', t==='bank');
+    updWarn();
+    if (t==='wallet') valW();
+    if (t==='bank') valB();
+    showToast('info', 'Method Selected', t==='wallet' ? 'USDT Wallet (BEP20)' : 'Bank Transfer (NGN)');
+  };
+
+  async function checkElig() {
+    if (!U) return;
+    try {
+      const invSnap = await getDocs(query(collection(db, 'investments'), where('userId', '==', U.uid)));
+      hasPlan = false;
+      invSnap.forEach(dc => {
+        const iv = dc.data();
+        if (iv.status !== 'completed' && (iv.daysPaid || 0) < (iv.days || 20)) hasPlan = true;
+      });
+
+      const wSnap = await getDocs(query(collection(db, 'withdrawals'), where('userId', '==', U.uid)));
+      hasPend = false;
+      hasToday = false;
+      let pendData = null;
+      wSnap.forEach(dc => {
+        const w = dc.data();
+        if (w.status === 'pending') {
+          hasPend = true;
+          if (!pendData) pendData = w;
+        }
+        if (w.status !== 'rejected' && isToday(w.createdAt)) hasToday = true;
+      });
+      if (pendData) {
+        document.getElementById('pendAmt').textContent = (pendData.currency === 'NGN' ? '₦' + ff(pendData.amount) : '$' + fu(pendData.amount));
+      }
+      updWarn();
+    } catch (e) {
+      console.error('❌ checkElig error:', e);
+      showToast('error', 'Error', 'Could not check eligibility.');
+      showResult('error', 'Couldn\'t Load Account', 'We could not check your withdrawal eligibility. Please try again.', 'OK');
+      throw e;
+    }
+  }
+
+  // ════════ VALIDATION ════════
+  function valW() {
+    const a = parseFloat(document.getElementById('amtW').value) || 0;
+    const addr = document.getElementById('addrW').value.trim();
+    document.getElementById('btnW').disabled = !(a >= 1 && a <= wdW && addr.length >= 10) || hasPend || hasToday;
+  }
+  function valB() {
+    const a = parseFloat(document.getElementById('amtB').value) || 0;
+    document.getElementById('btnB').disabled = !(a >= 1 && a <= wdW && document.getElementById('bankB').value && document.getElementById('acctB').value.trim().length === 10 && document.getElementById('nameB').value.trim().length >= 3) || hasPend || hasToday;
+  }
+
+  // ════════ EVENT LISTENERS ════════
+  document.getElementById('amtW').addEventListener('input', () => {
+    const a = parseFloat(document.getElementById('amtW').value) || 0;
+    const bd = document.getElementById('bdW');
+    if (a >= 1) { const f = a * 0.15; document.getElementById('bdAmtW').textContent = fu(a); document.getElementById('bdFeeW').textContent = fu(f); document.getElementById('bdNetW').textContent = fu(a - f); bd.classList.add('show'); }
+    else bd.classList.remove('show');
+    valW();
+  });
+  document.getElementById('addrW').addEventListener('input', valW);
+
+  document.getElementById('amtB').addEventListener('input', () => {
+    const a = parseFloat(document.getElementById('amtB').value) || 0;
+    const bd = document.getElementById('bdB');
+    if (a >= 1) { const f = a * 0.15, n = a - f; document.getElementById('bdAmtB').textContent = fu(a); document.getElementById('bdNgnB').textContent = ff(Math.round(a * 1500)); document.getElementById('bdFeeB').textContent = fu(f); document.getElementById('bdNetB').textContent = ff(Math.round(n * 1500)); bd.classList.add('show'); }
+    else bd.classList.remove('show');
+    valB();
+  });
+  ['bankB','acctB','nameB'].forEach(id => document.getElementById(id).addEventListener('input', valB));
+
+  // ════════ SET LOADING STATE ════════
+  function setLoading(btn, isLoading) {
+    if (isLoading) {
+      btn.classList.add('loading');
+      btn.disabled = true;
+    } else {
+      btn.classList.remove('loading');
+      btn.disabled = false;
+    }
+  }
+
+  // ════════ SUBMIT WITHDRAWAL ════════
+  async function submitWithdrawal(type, amt, details) {
+    const btn = document.getElementById(type === 'wallet' ? 'btnW' : 'btnB');
+    setLoading(btn, true);
+
+    try {
+      const ur = doc(db, 'users', U.uid);
+      await runTransaction(db, async (tx) => {
+        const s = await tx.get(ur);
+        const cw = s.data().withdrawalWallet || 0;
+        const cd = s.data().depositWallet || 0;
+        if (cw < amt) throw new Error('INSUFFICIENT');
+        tx.update(ur, { withdrawalWallet: cw - amt, walletBalance: cd + cw - amt });
+      });
+      wdW -= amt;
+
+      const fee = amt * 0.15;
+      const net = amt - fee;
+      const data = {
+        userId: U.uid, userEmail: U.email || '',
+        amount: amt, charge: fee, netAmount: net,
+        type: type, currency: 'USDT', status: 'pending',
+        createdAt: serverTimestamp(), sourceWallet: 'withdrawalWallet'
+      };
+
+      if (type === 'wallet') {
+        data.walletAddress = details.addr;
+        data.network = 'BEP20';
+        document.getElementById('amtW').value = '';
+        document.getElementById('addrW').value = '';
+        document.getElementById('bdW').classList.remove('show');
+      } else {
+        data.bankName = details.bank;
+        data.accountNumber = details.acct;
+        data.accountName = details.name;
+        document.getElementById('amtB').value = '';
+        document.getElementById('bankB').value = '';
+        document.getElementById('acctB').value = '';
+        document.getElementById('nameB').value = '';
+        document.getElementById('bdB').classList.remove('show');
+      }
+
+      const docRef = await addDoc(collection(db, 'withdrawals'), data);
+
+      const receiveMsg = type === 'wallet'
+        ? '$' + fu(net) + ' USDT to your BEP20 wallet'
+        : '₦' + ff(Math.round(net * 1500)) + ' to your bank account';
+
+      showToast('success', 'Withdrawal Submitted! ✅', 'Your request has been sent for admin approval.');
+      showResult('success', 'Withdrawal Sent! ✅',
+        '$' + fu(amt) + ' has been deducted from your Withdrawal Wallet.\n\nFee: $' + fu(fee) + ' (15%)\nYou will receive: ' + receiveMsg + '\n\nYour request has been sent to the admin for processing.',
+        'Back to Dashboard',
+        () => { window.location.href = 'dashboard.html'; });
+
+      console.log('✅ Withdrawal saved:', docRef.id);
+      setLoading(btn, false);
+      await checkElig();
+      await refresh();
+
+    } catch (e) {
+      console.error('❌ Withdrawal error:', e);
+      setLoading(btn, false);
+
+      if (e.message === 'INSUFFICIENT') {
+        await refresh();
+        showToast('error', 'Balance Changed', 'Your balance was updated. Please try again.');
+        showResult('error', 'Balance Changed', 'Your balance was updated. Please check and try again.', 'Try Again');
+      } else {
+        showToast('error', 'Failed', 'Something went wrong. Please try again.');
+        showResult('error', 'Failed', 'Something went wrong: ' + (e.code || e.message || 'unknown error'), 'Try Again');
+        await refresh();
+      }
+    }
+  }
+
+  // ════════ BUTTON HANDLERS ════════
+  document.getElementById('btnW').addEventListener('click', async () => {
+    try {
+      await refresh();
+      await checkElig();
+    } catch (e) { return; }
+
+    const a = parseFloat(document.getElementById('amtW').value) || 0;
+    const addr = document.getElementById('addrW').value.trim();
+
+    if (!hasPlan) { showToast('warning', 'No Active Plan', 'You need an active investment plan.'); showResult('error', 'No Active Plan', 'You need an active investment plan to withdraw USD.', 'Go to Investments', () => { window.location.href = 'investment.html'; }); return; }
+    if (!inWindow) { showToast('warning', 'Outside Hours', 'Withdrawals only 8AM-5PM, Mon-Sat.'); showResult('error', 'Outside Hours', 'Withdrawals only 8AM-5PM, Mon-Sat.', 'OK'); return; }
+    if (hasPend) { showToast('warning', 'Pending Request', 'You already have a pending withdrawal.'); showResult('error', 'Pending Request', 'You already have a pending withdrawal. Wait for admin approval.', 'OK'); return; }
+    if (hasToday) { showToast('warning', 'Daily Limit', 'You can only withdraw once per day.'); showResult('error', 'Daily Limit', 'You can only withdraw once per day.', 'OK'); return; }
+    if (a < 1) { showToast('warning', 'Minimum', 'Minimum withdrawal is $1.00.'); showResult('error', 'Minimum', 'Minimum withdrawal is $1.00.', 'OK'); return; }
+    if (a > wdW) { showToast('error', 'Insufficient', 'Your balance is $' + fu(wdW)); showResult('error', 'Insufficient', 'Your Withdrawal Wallet balance is $' + fu(wdW), 'OK'); return; }
+    if (addr.length < 10) { showToast('warning', 'Invalid Address', 'Enter a valid BEP20 wallet address.'); showResult('error', 'Invalid Address', 'Enter a valid BEP20 wallet address.', 'OK'); return; }
+
+    await submitWithdrawal('wallet', a, { addr });
+  });
+
+  document.getElementById('btnB').addEventListener('click', async () => {
+    try {
+      await refresh();
+      await checkElig();
+    } catch (e) { return; }
+
+    const a = parseFloat(document.getElementById('amtB').value) || 0;
+    const bank = document.getElementById('bankB').value;
+    const acct = document.getElementById('acctB').value.trim();
+    const name = document.getElementById('nameB').value.trim();
+
+    if (!hasPlan) { showToast('warning', 'No Active Plan', 'You need an active investment plan.'); showResult('error', 'No Active Plan', 'You need an active investment plan to withdraw USD.', 'Go to Investments', () => { window.location.href = 'investment.html'; }); return; }
+    if (!inWindow) { showToast('warning', 'Outside Hours', 'Withdrawals only 8AM-5PM, Mon-Sat.'); showResult('error', 'Outside Hours', 'Withdrawals only 8AM-5PM, Mon-Sat.', 'OK'); return; }
+    if (hasPend) { showToast('warning', 'Pending Request', 'You already have a pending withdrawal.'); showResult('error', 'Pending Request', 'You already have a pending withdrawal.', 'OK'); return; }
+    if (hasToday) { showToast('warning', 'Daily Limit', '1 withdrawal per day.'); showResult('error', 'Daily Limit', '1 withdrawal per day.', 'OK'); return; }
+    if (a < 1) { showToast('warning', 'Minimum', 'Minimum $1.00.'); showResult('error', 'Minimum', 'Minimum $1.00.', 'OK'); return; }
+    if (a > wdW) { showToast('error', 'Insufficient', 'Balance: $' + fu(wdW)); showResult('error', 'Insufficient', 'Balance: $' + fu(wdW), 'OK'); return; }
+    if (!bank) { showToast('warning', 'Missing', 'Please select a bank.'); showResult('error', 'Missing', 'Please select a bank.', 'OK'); return; }
+    if (acct.length !== 10) { showToast('warning', 'Invalid', 'Enter 10-digit account number.'); showResult('error', 'Invalid', 'Enter 10-digit account number.', 'OK'); return; }
+    if (name.length < 3) { showToast('warning', 'Missing', 'Enter account name.'); showResult('error', 'Missing', 'Enter account name.', 'OK'); return; }
+
+    await submitWithdrawal('bank', a, { bank, acct, name });
+  });
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = 'login.html'; return; }
+    U = user;
+    checkTime();
+    await refresh();
+    try {
+      await checkElig();
+    } catch (e) { /* already shown to user */ }
+  });
+</script>
+</body>
+</html>

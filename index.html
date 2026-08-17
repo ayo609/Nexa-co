@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <title>Nexa – Register</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f4f3fa;
+      --card: #ffffff;
+      --primary: #5c3df4;
+      --primary-dark: #4528d4;
+      --primary-soft: #ede9ff;
+      --accent: #a78bfa;
+      --accent-gold: #f59e0b;
+      --text: #1a1533;
+      --muted: #7b7694;
+      --border: #e3e0f5;
+      --input-bg: #f8f7ff;
+      --success: #16a34a;
+      --error: #dc2626;
+      --banner-bg: linear-gradient(135deg, #1e1445 0%, #3b1fa8 100%);
+      --shadow: 0 8px 32px -8px rgba(92, 61, 244, 0.18);
+      --gold-grad: linear-gradient(135deg, #f59e0b 0%, #fbbf24 50%, #f59e0b 100%);
+    }
+
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      color: var(--text);
+      background-image: 
+        radial-gradient(ellipse at 20% 20%, rgba(92,61,244,0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(167,139,250,0.06) 0%, transparent 50%);
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(10px);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(92,61,244,0.3);
+    }
+    .logo-icon svg { width: 21px; height: 21px; }
+    .logo-name {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.5px;
+    }
+    .logo-name span { color: var(--primary); }
+
+    .btn-signin {
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--primary);
+      background: var(--primary-soft);
+      border: 1.5px solid transparent;
+      border-radius: 50px;
+      padding: 9px 24px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-signin:hover { background: #ddd6fe; transform: translateY(-1px); }
+
+    main {
+      flex: 1;
+      padding: 24px 16px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .invite-banner {
+      width: 100%;
+      max-width: 440px;
+      background: linear-gradient(135deg, #dcfce7 0%, #f0fdf4 100%);
+      border: 2px solid #bbf7d0;
+      border-radius: 16px;
+      padding: 14px 18px;
+      display: none;
+      align-items: center;
+      gap: 12px;
+    }
+    .invite-banner.show { display: flex; }
+    .invite-banner svg { width: 24px; height: 24px; color: var(--success); flex-shrink: 0; }
+    .invite-banner p { font-size: 0.85rem; color: #166534; font-weight: 600; }
+    .invite-banner p strong { color: #15803d; }
+
+    .banner {
+      width: 100%;
+      max-width: 440px;
+      background: var(--banner-bg);
+      border-radius: 20px;
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    .banner::before {
+      content: '';
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: rgba(167,139,250,0.1);
+    }
+    .banner::after {
+      content: '';
+      position: absolute;
+      bottom: -30px;
+      left: 30%;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(245,158,11,0.1);
+    }
+    .banner-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      background: rgba(167, 139, 250, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+    }
+    .banner-icon svg { width: 28px; height: 28px; color: var(--accent); }
+    .banner-text { position: relative; z-index: 1; }
+    .banner-text h2 { font-size: 1.1rem; font-weight: 700; color: #ffffff; margin-bottom: 4px; }
+    .banner-text p { font-size: 0.85rem; color: rgba(255,255,255,0.72); line-height: 1.4; }
+    .banner-text p strong { color: #fbbf24; font-weight: 700; }
+
+    /* Dual Wallet Display - UPDATED: Bonus goes to Withdrawal Wallet */
+    .wallets-row {
+      width: 100%;
+      max-width: 440px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .wallet-mini {
+      background: linear-gradient(135deg, #1e1445 0%, #2d1b69 100%);
+      border-radius: 16px;
+      padding: 14px 16px;
+      color: #fff;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .wallet-mini::before {
+      content: '';
+      position: absolute;
+      top: -20px;
+      right: -20px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: rgba(245,158,11,0.06);
+    }
+    .wallet-mini.withdraw::after {
+      content: '';
+      position: absolute;
+      bottom: -15px;
+      left: -15px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: rgba(34,197,94,0.08);
+    }
+    .wallet-mini .wallet-icon {
+      font-size: 1.5rem;
+      margin-bottom: 6px;
+      position: relative;
+      z-index: 1;
+    }
+    .wallet-mini .wallet-label {
+      font-size: 0.65rem;
+      color: rgba(255,255,255,0.6);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 3px;
+      position: relative;
+      z-index: 1;
+    }
+    .wallet-mini .wallet-amount {
+      font-size: 1.1rem;
+      font-weight: 800;
+      position: relative;
+      z-index: 1;
+    }
+    .wallet-mini .wallet-sub {
+      font-size: 0.62rem;
+      color: rgba(255,255,255,0.45);
+      margin-top: 2px;
+      position: relative;
+      z-index: 1;
+    }
+    .wallet-mini.highlight-withdraw {
+      border: 2px solid rgba(34,197,94,0.4);
+    }
+
+    .card {
+      width: 100%;
+      max-width: 440px;
+      background: var(--card);
+      border-radius: 24px;
+      padding: 28px 24px 24px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+
+    .card h1 { font-size: 1.5rem; font-weight: 800; color: var(--text); margin-bottom: 4px; letter-spacing: -0.5px; }
+    .card .subtitle { font-size: 0.9rem; color: var(--muted); margin-bottom: 24px; }
+
+    .field { position: relative; margin-bottom: 14px; }
+    .field-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #b3aed4; display: flex; pointer-events: none; z-index: 1; }
+    .field-icon svg { width: 20px; height: 20px; }
+
+    .field input {
+      width: 100%; height: 52px; background: var(--input-bg); border: 2px solid var(--border);
+      border-radius: 14px; padding: 0 16px 0 48px; font-family: inherit; font-size: 0.95rem;
+      color: var(--text); outline: none; transition: all 0.2s;
+    }
+    .field input::placeholder { color: #b3aed4; font-size: 0.9rem; }
+    .field input:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 4px rgba(92,61,244,0.08); }
+    .field input.error { border-color: var(--error); background: #fef2f2; }
+    .field input.success { border-color: var(--success); background: #f0fdf4; }
+
+    .referral-status { font-size: 0.78rem; margin-top: 6px; padding-left: 4px; display: none; font-weight: 600; }
+    .referral-status.valid { color: var(--success); display: block; }
+    .referral-status.invalid { color: var(--error); display: block; }
+    .referral-status.checking { color: var(--muted); display: block; }
+
+    .toggle-pw { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #b3aed4; display: flex; padding: 8px; z-index: 1; }
+    .toggle-pw:hover { color: var(--primary); }
+    .toggle-pw svg { width: 20px; height: 20px; }
+
+    .password-strength { height: 5px; background: #e5e7eb; border-radius: 3px; margin-top: 8px; overflow: hidden; }
+    .password-strength-bar { height: 100%; width: 0%; border-radius: 3px; transition: width 0.3s, background 0.3s; }
+
+    .btn-create {
+      width: 100%; height: 54px; background: var(--primary); color: #fff; font-family: inherit;
+      font-size: 1rem; font-weight: 700; border: none; border-radius: 14px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 8px;
+      transition: all 0.2s; letter-spacing: 0.2px; box-shadow: 0 4px 16px rgba(92,61,244,0.3);
+    }
+    .btn-create:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(92,61,244,0.4); }
+    .btn-create:active { transform: scale(0.98); }
+    .btn-create:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .btn-create svg { width: 20px; height: 20px; }
+
+    .signin-link { text-align: center; font-size: 0.9rem; color: var(--muted); margin-top: 20px; }
+    .signin-link a { color: var(--primary); font-weight: 700; text-decoration: none; transition: color 0.2s; }
+    .signin-link a:hover { color: var(--primary-dark); text-decoration: underline; }
+
+    .spinner { width: 20px; height: 20px; border: 2.5px solid rgba(255,255,255,0.35); border-top-color: #fff; border-radius: 50%; animation: spin 600ms linear infinite; display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Toast Notifications */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 350px;
+    }
+    .toast {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 14px 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: slideIn 0.3s ease;
+      border-left: 4px solid;
+      position: relative;
+      overflow: hidden;
+    }
+    .toast.success { border-left-color: var(--success); }
+    .toast.error { border-left-color: var(--error); }
+    .toast.info { border-left-color: var(--primary); }
+    .toast.warning { border-left-color: var(--accent-gold); }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+    .toast-icon {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+    .toast-content {
+      flex: 1;
+    }
+    .toast-title {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+    .toast-message {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .toast-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      padding: 4px;
+      flex-shrink: 0;
+    }
+    .toast-close:hover { color: var(--text); }
+
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(20,12,50,0.6); backdrop-filter: blur(6px); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: var(--card); border-radius: 24px; padding: 32px 26px 26px; max-width: 360px; width: 100%; text-align: center; box-shadow: 0 20px 60px rgba(92,61,244,0.3); animation: modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+    @keyframes modalIn { from { opacity: 0; transform: scale(0.85) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    .modal-icon { width: 68px; height: 68px; border-radius: 50%; margin: 0 auto 18px; display: flex; align-items: center; justify-content: center; }
+    .modal-icon.success { background: #dcfce7; } .modal-icon.error { background: #fee2e2; } .modal-icon.info { background: var(--primary-soft); }
+    .modal-icon svg { width: 34px; height: 34px; }
+    .modal h3 { font-size: 1.2rem; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+    .modal p { font-size: 0.9rem; color: var(--muted); line-height: 1.6; margin-bottom: 22px; }
+    .modal-btn { width: 100%; padding: 14px; border: none; border-radius: 13px; font-family: inherit; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.2s; background: var(--primary); color: #fff; }
+    .modal-btn:hover { background: var(--primary-dark); }
+
+    @media(max-width:480px){
+      .wallets-row{grid-template-columns:1fr 1fr;gap:8px;}
+      .wallet-mini{padding:10px 12px;}
+      .wallet-mini .wallet-amount{font-size:0.95rem;}
+      .toast-container { left: 20px; right: 20px; max-width: none; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="#">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+    </div>
+    <span class="logo-name">Nex<span>a</span></span>
+  </a>
+  <a href="login.html" class="btn-signin">Sign in</a>
+</nav>
+
+<main>
+
+  <div class="invite-banner" id="inviteBanner">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
+      <path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>
+    </svg>
+    <p>You've been invited! Referral code <strong id="inviteCode">—</strong> applied.</p>
+  </div>
+
+  <div class="banner">
+    <div class="banner-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="8" width="18" height="13" rx="2"/><path d="M8 8V6a4 4 0 018 0v2"/><path d="M12 13v3"/>
+      </svg>
+    </div>
+    <div class="banner-text">
+      <h2>Create account &amp; earn</h2>
+      <p>Get a <strong>$0.35 welcome bonus</strong> instantly in your Withdrawal Wallet!</p>
+    </div>
+  </div>
+
+  <!-- ✅ UPDATED: Bonus goes to Withdrawal Wallet -->
+  <div class="wallets-row">
+    <div class="wallet-mini">
+      <div class="wallet-icon">💰</div>
+      <div class="wallet-label">Deposit Wallet</div>
+      <div class="wallet-amount">$0.00</div>
+      <div class="wallet-sub">For investments & plans</div>
+    </div>
+    <div class="wallet-mini highlight-withdraw">
+      <div class="wallet-icon">💸</div>
+      <div class="wallet-label">Withdrawal Wallet</div>
+      <div class="wallet-amount">$0.35</div>
+      <div class="wallet-sub">Welcome bonus + cashouts</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h1>Create your account</h1>
+    <p class="subtitle">A few details and you're in.</p>
+
+    <div class="field">
+      <span class="field-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>
+        </svg>
+      </span>
+      <input type="text" id="referral" placeholder="Referral code (optional)" autocomplete="off" />
+      <div class="referral-status" id="referralStatus"></div>
+    </div>
+
+    <div class="field">
+      <span class="field-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+        </svg>
+      </span>
+      <input type="email" id="email" placeholder="Email address" autocomplete="email" />
+    </div>
+
+    <div class="field">
+      <span class="field-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
+        </svg>
+      </span>
+      <input type="tel" id="phone" placeholder="Phone number" autocomplete="tel" />
+    </div>
+
+    <div class="field">
+      <span class="field-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+        </svg>
+      </span>
+      <input type="password" id="password" placeholder="Create a password" autocomplete="new-password" />
+      <button class="toggle-pw" onclick="togglePw('password', this)" tabindex="-1" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+        </svg>
+      </button>
+      <div class="password-strength"><div class="password-strength-bar" id="passwordStrengthBar"></div></div>
+    </div>
+
+    <div class="field">
+      <span class="field-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+        </svg>
+      </span>
+      <input type="password" id="confirmPassword" placeholder="Confirm password" autocomplete="new-password" />
+      <button class="toggle-pw" onclick="togglePw('confirmPassword', this)" tabindex="-1" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+        </svg>
+      </button>
+    </div>
+
+    <button class="btn-create" id="registerBtn" onclick="handleRegister()">
+      <div class="spinner" id="spinner"></div>
+      <span id="btnText">Create account</span>
+      <svg id="btnArrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+      </svg>
+    </button>
+
+    <p class="signin-link">Already have an account? <a href="login.html">Sign in</a></p>
+  </div>
+</main>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-icon" id="modalIcon"></div>
+    <h3 id="modalTitle"></h3>
+    <p id="modalMsg"></p>
+    <button class="modal-btn" onclick="closeModal()">OK</button>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, setDoc, serverTimestamp, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  // ✅ UPDATED FIREBASE CONFIG
+  const firebaseConfig = {
+    apiKey: "AIzaSyAXVLeBN6rROvG6tEUN5WD8X1SZ4hatBxA",
+    authDomain: "nexa-co.firebaseapp.com",
+    projectId: "nexa-co",
+    storageBucket: "nexa-co.firebasestorage.app",
+    messagingSenderId: "345722583751",
+    appId: "1:345722583751:web:b987628aa77bce38629ce2"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const WELCOME_BONUS = 0.35;
+
+  // Toast notification system
+  function showToast(type, title, message, duration = 4000) {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    const icons = {
+      success: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`,
+      error: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+      info: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#5c3df4" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+      warning: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`
+    };
+    
+    toast.innerHTML = `
+      ${icons[type] || icons.info}
+      <div class="toast-content">
+        <div class="toast-title">${title}</div>
+        <div class="toast-message">${message}</div>
+      </div>
+      <button class="toast-close" onclick="this.parentElement.remove()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    `;
+    
+    container.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.style.animation = 'slideOut 0.3s ease';
+      setTimeout(() => toast.remove(), 300);
+    }, duration);
+  }
+
+  const ICONS = {
+    success: `<svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`,
+    error: `<svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+    info: `<svg viewBox="0 0 24 24" fill="none" stroke="#5c3df4" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`
+  };
+
+  function showModal(type, title, msg, onClose) {
+    document.getElementById('modalIcon').className = 'modal-icon ' + type;
+    document.getElementById('modalIcon').innerHTML = ICONS[type];
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalMsg').innerHTML = msg;
+    document.getElementById('modalOverlay').classList.add('show');
+    window._modalOnClose = onClose || null;
+  }
+
+  window.closeModal = function() {
+    document.getElementById('modalOverlay').classList.remove('show');
+    if (window._modalOnClose) { window._modalOnClose(); window._modalOnClose = null; }
+  };
+
+  function setLoading(loading) {
+    const btn = document.getElementById('registerBtn');
+    const spinner = document.getElementById('spinner');
+    const btnText = document.getElementById('btnText');
+    const btnArrow = document.getElementById('btnArrow');
+    btn.disabled = loading;
+    spinner.style.display = loading ? 'block' : 'none';
+    btnArrow.style.display = loading ? 'none' : 'block';
+    btnText.textContent = loading ? 'Creating account…' : 'Create account';
+  }
+
+  function friendlyError(code) {
+    const map = {
+      'auth/email-already-in-use': 'This email is already registered.',
+      'auth/invalid-email': 'Please enter a valid email address.',
+      'auth/weak-password': 'Password too weak. Use at least 6 characters.',
+      'auth/network-request-failed':'Network error. Check your connection.',
+      'auth/too-many-requests': 'Too many attempts. Please wait.',
+    };
+    return map[code] || 'Something went wrong. Please try again.';
+  }
+
+  function getRefFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('ref') || null;
+  }
+
+  function autoFillReferral(code) {
+    if (!code) return;
+    document.getElementById('referral').value = code.toUpperCase();
+    document.getElementById('inviteCode').textContent = code.toUpperCase();
+    document.getElementById('inviteBanner').classList.add('show');
+    showToast('info', 'Referral Applied', `Referral code ${code.toUpperCase()} has been applied!`);
+    if (typeof window.validateReferral === 'function') window.validateReferral();
+  }
+
+  let referralTimeout;
+  window.validateReferral = function() {
+    clearTimeout(referralTimeout);
+    const code = document.getElementById('referral').value.trim().toUpperCase();
+    const statusEl = document.getElementById('referralStatus');
+    const inputEl = document.getElementById('referral');
+    if (!code || code.length < 5) { 
+      statusEl.className = 'referral-status'; 
+      statusEl.textContent = ''; 
+      inputEl.classList.remove('success', 'error'); 
+      return; 
+    }
+    statusEl.className = 'referral-status checking'; 
+    statusEl.textContent = 'Checking...'; 
+    inputEl.classList.remove('success', 'error');
+    
+    referralTimeout = setTimeout(async () => {
+      try {
+        const codeSnap = await getDoc(doc(db, 'referralCodes', code));
+        if (codeSnap.exists()) {
+          const userSnap = await getDoc(doc(db, 'users', codeSnap.data().uid));
+          if (userSnap.exists()) { 
+            statusEl.className = 'referral-status valid'; 
+            statusEl.textContent = '✓ Valid referral code!'; 
+            inputEl.classList.add('success'); 
+            inputEl.classList.remove('error');
+            showToast('success', 'Valid Referral', 'Referral code is valid!');
+            return; 
+          }
+        }
+        statusEl.className = 'referral-status invalid'; 
+        statusEl.textContent = '✗ Invalid referral code.'; 
+        inputEl.classList.add('error'); 
+        inputEl.classList.remove('success');
+        showToast('error', 'Invalid Referral', 'This referral code does not exist.');
+      } catch (error) { 
+        statusEl.className = 'referral-status invalid'; 
+        statusEl.textContent = 'Error checking code.'; 
+        inputEl.classList.add('error');
+        showToast('error', 'Error', 'Failed to verify referral code.');
+      }
+    }, 500);
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const refCode = getRefFromURL();
+    if (refCode) autoFillReferral(refCode);
+    document.getElementById('referral').addEventListener('input', validateReferral);
+    document.getElementById('password').addEventListener('input', (e) => {
+      const p = e.target.value; 
+      const bar = document.getElementById('passwordStrengthBar'); 
+      let s = 0;
+      if (p.length >= 6) s++; 
+      if (p.length >= 8) s++; 
+      if (/[A-Z]/.test(p)) s++;
+      if (/[0-9]/.test(p)) s++; 
+      if (/[^A-Za-z0-9]/.test(p)) s++;
+      bar.style.width = (s/5)*100 + '%'; 
+      bar.style.background = s <= 2 ? '#dc2626' : s <= 3 ? '#f59e0b' : '#16a34a';
+    });
+  });
+
+  window.handleRegister = async function() {
+    const email = document.getElementById('email').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const password = document.getElementById('password').value;
+    const confirm = document.getElementById('confirmPassword').value;
+    const referral = document.getElementById('referral').value.trim().toUpperCase();
+
+    if (!email) {
+      showToast('warning', 'Email Required', 'Please enter your email address.');
+      return showModal('info', 'Email required', 'Please enter your email address.');
+    }
+    if (!phone) {
+      showToast('warning', 'Phone Required', 'Please enter your phone number.');
+      return showModal('info', 'Phone required', 'Please enter your phone number.');
+    }
+    if (!password) {
+      showToast('warning', 'Password Required', 'Please create a password.');
+      return showModal('info', 'Password required', 'Please create a password.');
+    }
+    if (password.length < 6) {
+      showToast('error', 'Password Too Short', 'Password must be at least 6 characters.');
+      return showModal('error', 'Password too short', 'At least 6 characters.');
+    }
+    if (password !== confirm) {
+      showToast('error', 'Password Mismatch', 'Passwords do not match.');
+      return showModal('error', 'Passwords don\'t match', 'Make sure both fields match.');
+    }
+    if (!/^(\+234|0)?[789]\d{9}$/.test(phone.replace(/\s/g, ''))) {
+      showToast('error', 'Invalid Phone', 'Enter a valid Nigerian phone number.');
+      return showModal('error', 'Invalid phone', 'Enter a valid Nigerian phone number.');
+    }
+
+    setLoading(true);
+    showToast('info', 'Creating Account', 'Setting up your Nexa account...');
+    
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      const uid = cred.user.uid;
+      let referredBy = null;
+
+      if (referral) {
+        const codeSnap = await getDoc(doc(db, 'referralCodes', referral));
+        if (codeSnap.exists()) {
+          const referrerUid = codeSnap.data().uid;
+          const userSnap = await getDoc(doc(db, 'users', referrerUid));
+          if (userSnap.exists() && referrerUid !== uid) {
+            referredBy = referrerUid;
+          }
+        }
+      }
+
+      const shortCode = uid.substring(0, 8).toUpperCase();
+
+      // ✅ BONUS GOES TO WITHDRAWAL WALLET
+      await setDoc(doc(db, 'users', uid), {
+        uid, 
+        email, 
+        phone: phone.replace(/\s/g, ''), 
+        referredBy, 
+        referralCode: shortCode,
+        depositWallet: 0,                     // 💰 Starts at $0 (for investments)
+        withdrawalWallet: WELCOME_BONUS,       // 💸 $0.35 welcome bonus (can withdraw)
+        walletBalance: WELCOME_BONUS,          // Total sync
+        totalEarnings: WELCOME_BONUS,
+        referralBonusGiven: false,
+        currency: 'USDT',
+        createdAt: serverTimestamp(),
+        status: 'active'
+      });
+
+      await setDoc(doc(db, 'referralCodes', shortCode), { 
+        uid, 
+        createdAt: serverTimestamp() 
+      });
+
+      setLoading(false);
+      showToast('success', 'Account Created! 🎉', `Welcome to Nexa! $0.35 USDT added to your Withdrawal Wallet!`);
+      
+      showModal('success', 'Account created! 🎉',
+        `Welcome to Nexa! <strong>$0.35 USDT</strong> has been added to your <strong>Withdrawal Wallet</strong>. You can withdraw it anytime!`,
+        () => { window.location.href = 'dashboard.html'; }
+      );
+    } catch (err) {
+      setLoading(false);
+      const errorMsg = friendlyError(err.code);
+      showToast('error', 'Registration Failed', errorMsg);
+      showModal('error', 'Registration failed', errorMsg);
+    }
+  };
+</script>
+
+<script>
+  function togglePw(id, btn) {
+    const input = document.getElementById(id);
+    const isText = input.type === 'text';
+    input.type = isText ? 'password' : 'text';
+    btn.innerHTML = isText
+      ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`
+      : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
+  }
+</script>
+</body>
+</html>

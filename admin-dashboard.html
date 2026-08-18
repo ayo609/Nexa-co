@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<title>Nexa – Admin Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{
+    --bg:#f4f3fa; --card:#ffffff;
+    --primary:#5c3df4; --primary-dark:#4528d4; --primary-soft:#ede9ff;
+    --accent:#a78bfa; --accent-gold:#f59e0b; --text:#1a1533; --muted:#7b7694;
+    --border:#e3e0f5; --input-bg:#f8f7ff;
+    --dark-card:linear-gradient(135deg,#1e1445 0%,#3b1fa8 100%);
+    --success:#16a34a; --error:#dc2626; --warn:#d97706;
+  }
+  body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);padding-bottom:70px;min-height:100vh;}
+
+  .topbar{background:var(--card);padding:14px 18px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;}
+  .topbar-left{display:flex;align-items:center;gap:10px;}
+  .logo-icon{width:40px;height:40px;border-radius:12px;background:var(--primary);display:flex;align-items:center;justify-content:center;}
+  .logo-icon svg{width:20px;height:20px;color:#fff;stroke-width:2.5;}
+  .logo-text{font-size:1.2rem;font-weight:800;}
+  .logo-text span{color:var(--primary);}
+  .admin-badge{background:var(--accent-gold);color:#1e1445;font-size:0.6rem;font-weight:800;padding:3px 10px;border-radius:50px;}
+  .topbar-right{display:flex;align-items:center;gap:10px;}
+  .logout-btn{background:#fee2e2;color:#b91c1c;border:none;border-radius:10px;padding:8px 16px;font-size:0.75rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:inherit;}
+  .logout-btn:hover{background:#fecaca;}
+  .logout-btn svg{width:14px;height:14px;}
+
+  main{padding:16px;max-width:900px;margin:0 auto;}
+
+  .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+  .stat-card{background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:16px;text-align:center;transition:all 0.2s;cursor:pointer;}
+  .stat-card:hover{border-color:var(--primary);box-shadow:0 4px 12px rgba(92,61,244,0.1);transform:translateY(-2px);}
+  .stat-card .sv{font-size:1.4rem;font-weight:800;color:var(--primary);}
+  .stat-card .sl{font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px;margin-top:3px;}
+  .stat-card.warning .sv{color:var(--warn);}
+  .stat-card.success .sv{color:var(--success);}
+
+  .nav-menu{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:20px;}
+  .nav-item{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:14px 8px;text-align:center;cursor:pointer;transition:all 0.2s;text-decoration:none;color:var(--text);}
+  .nav-item:hover{border-color:var(--primary);box-shadow:0 4px 12px rgba(92,61,244,0.1);}
+  .nav-item.active{background:var(--primary);border-color:var(--primary);color:#fff;}
+  .nav-item .ni-icon{font-size:1.5rem;margin-bottom:6px;}
+  .nav-item .ni-label{font-size:0.65rem;font-weight:700;}
+
+  .section-card{background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:16px;margin-bottom:16px;}
+  .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .section-header h3{font-size:0.95rem;font-weight:700;display:flex;align-items:center;gap:8px;}
+  .section-header h3 svg{width:16px;height:16px;color:var(--primary);}
+  .section-header .view-all{font-size:0.72rem;font-weight:700;color:var(--primary);text-decoration:none;}
+
+  .recent-list{display:flex;flex-direction:column;gap:8px;}
+  .recent-item{display:flex;align-items:center;gap:10px;padding:10px;background:var(--input-bg);border-radius:10px;font-size:0.8rem;}
+  .recent-item .ri-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem;}
+  .recent-item .ri-info{flex:1;min-width:0;}
+  .recent-item .ri-title{font-weight:700;font-size:0.8rem;color:var(--text);}
+  .recent-item .ri-sub{font-size:0.68rem;color:var(--muted);}
+  .recent-item .ri-amount{font-weight:800;font-size:0.8rem;flex-shrink:0;}
+
+  .danger-zone{background:#fef2f2;border:2px solid #fecaca;border-radius:16px;padding:16px;margin-bottom:16px;}
+  .danger-zone h3{font-size:0.9rem;font-weight:800;color:var(--error);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+  .danger-zone h3 svg{width:18px;height:18px;}
+  .danger-zone p{font-size:0.78rem;color:#991b1b;margin-bottom:12px;}
+  .danger-btns{display:flex;gap:8px;flex-wrap:wrap;}
+  .danger-btn{flex:1;min-width:120px;padding:11px;border-radius:10px;font-size:0.75rem;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:6px;}
+  .danger-btn svg{width:14px;height:14px;}
+  .danger-btn.clear{background:#fef3c7;color:#92400e;border:1px solid #fde68a;}
+  .danger-btn.clear:hover{background:#fde68a;}
+  .danger-btn.delete{background:#fee2e2;color:#b91c1c;border:1px solid #fecaca;}
+  .danger-btn.delete:hover{background:#fecaca;}
+  .danger-btn.erase{background:#dc2626;color:#fff;border:1px solid #b91c1c;}
+  .danger-btn.erase:hover{background:#b91c1c;}
+
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(20,12,50,0.7);backdrop-filter:blur(6px);z-index:100;align-items:center;justify-content:center;padding:20px;}
+  .modal-overlay.show{display:flex;}
+  .modal{background:var(--card);border-radius:20px;padding:28px 22px;max-width:380px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:modalIn .3s ease;}
+  @keyframes modalIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+  .modal-icon{width:60px;height:60px;border-radius:50%;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;}
+  .modal-icon.warn{background:#fef3c7;}
+  .modal-icon.danger{background:#fee2e2;}
+  .modal-icon svg{width:28px;height:28px;}
+  .modal h3{font-size:1.1rem;font-weight:800;margin-bottom:8px;}
+  .modal p{font-size:0.85rem;color:var(--muted);margin-bottom:18px;line-height:1.5;}
+  .modal-actions{display:flex;gap:10px;}
+  .modal-btn{flex:1;padding:12px;border-radius:10px;font-size:0.85rem;font-weight:700;cursor:pointer;border:none;font-family:inherit;}
+  .modal-btn.cancel{background:var(--input-bg);color:var(--muted);border:1.5px solid var(--border);}
+  .modal-btn.confirm{background:var(--error);color:#fff;}
+
+  /* Toast Notifications */
+  .toast-container{position:fixed;top:20px;right:20px;z-index:1000;display:flex;flex-direction:column;gap:10px;max-width:350px;}
+  .toast{background:var(--card);border-radius:12px;padding:14px 16px;box-shadow:0 8px 24px rgba(0,0,0,0.15);display:flex;align-items:center;gap:12px;animation:slideIn 0.3s ease;border-left:4px solid;}
+  .toast.success{border-left-color:var(--success);}
+  .toast.error{border-left-color:var(--error);}
+  .toast.info{border-left-color:var(--primary);}
+  .toast.warning{border-left-color:var(--accent-gold);}
+  @keyframes slideIn{from{transform:translateX(100%);opacity:0;}to{transform:translateX(0);opacity:1;}}
+  @keyframes slideOut{from{transform:translateX(0);opacity:1;}to{transform:translateX(100%);opacity:0;}}
+  .toast-icon{width:22px;height:22px;flex-shrink:0;}
+  .toast-content{flex:1;}
+  .toast-title{font-weight:700;font-size:0.88rem;color:var(--text);margin-bottom:2px;}
+  .toast-message{font-size:0.8rem;color:var(--muted);}
+  .toast-close{background:none;border:none;cursor:pointer;color:var(--muted);padding:4px;flex-shrink:0;}
+
+  @media(max-width:768px){
+    .stats-grid{grid-template-columns:repeat(2,1fr);}
+    .nav-menu{grid-template-columns:repeat(3,1fr);}
+  }
+  @media(max-width:480px){
+    .toast-container{left:20px;right:20px;max-width:none;}
+    .nav-menu{grid-template-columns:repeat(2,1fr);}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+    <span class="logo-text">Nex<span>a</span></span>
+    <span class="admin-badge">🔐 ADMIN</span>
+  </div>
+  <button class="logout-btn" onclick="handleLogout()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Logout</button>
+</div>
+
+<main>
+  <div class="stats-grid">
+    <div class="stat-card" onclick="window.location.href='admin-users.html'"><div class="sv" id="statUsers">0</div><div class="sl">Total Users</div></div>
+    <div class="stat-card warning" onclick="window.location.href='admin-deposits.html'"><div class="sv" id="statPendingDep">0</div><div class="sl">Pending Deposits</div></div>
+    <div class="stat-card warning" onclick="window.location.href='admin-withdrawals.html'"><div class="sv" id="statPendingWith">0</div><div class="sl">Pending Withdrawals</div></div>
+    <div class="stat-card" onclick="window.location.href='admin-investments.html'"><div class="sv">$<span id="statInvestments">0</span></div><div class="sl">Total Invested</div></div>
+    <div class="stat-card success"><div class="sv">$<span id="statROI">0</span></div><div class="sl">Total ROI Paid</div></div>
+    <div class="stat-card success"><div class="sv">$<span id="statReferrals">0</span></div><div class="sl">Referral Bonuses</div></div>
+  </div>
+
+  <div class="nav-menu">
+    <a href="admin-dashboard.html" class="nav-item active"><div class="ni-icon">📊</div><div class="ni-label">Dashboard</div></a>
+    <a href="admin-users.html" class="nav-item"><div class="ni-icon">👥</div><div class="ni-label">Users</div></a>
+    <a href="admin-deposits.html" class="nav-item"><div class="ni-icon">📥</div><div class="ni-label">Deposits</div></a>
+    <a href="admin-withdrawals.html" class="nav-item"><div class="ni-icon">📤</div><div class="ni-label">Withdrawals</div></a>
+    <a href="admin-investments.html" class="nav-item"><div class="ni-icon">💼</div><div class="ni-label">Investments</div></a>
+  </div>
+
+  <div class="section-card">
+    <div class="section-header">
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Recent Deposits</h3>
+      <a href="admin-deposits.html" class="view-all">View All →</a>
+    </div>
+    <div class="recent-list" id="recentDeposits"><p style="font-size:0.8rem;color:var(--muted);">Loading...</p></div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-header">
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Recent Withdrawals</h3>
+      <a href="admin-withdrawals.html" class="view-all">View All →</a>
+    </div>
+    <div class="recent-list" id="recentWithdrawals"><p style="font-size:0.8rem;color:var(--muted);">Loading...</p></div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-header">
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Recent Users</h3>
+      <a href="admin-users.html" class="view-all">View All →</a>
+    </div>
+    <div class="recent-list" id="recentUsers"><p style="font-size:0.8rem;color:var(--muted);">Loading...</p></div>
+  </div>
+
+  <div class="danger-zone">
+    <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Danger Zone</h3>
+    <p>These actions are irreversible. Use with extreme caution.</p>
+    <div class="danger-btns">
+      <button class="danger-btn clear" onclick="confirmClearPending()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>Clear Pending</button>
+      <button class="danger-btn delete" onclick="confirmDeleteRejected()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>Delete Rejected</button>
+      <button class="danger-btn erase" onclick="confirmEraseAll()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>Erase System</button>
+    </div>
+  </div>
+</main>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-icon" id="modalIcon"></div>
+    <h3 id="modalTitle"></h3>
+    <p id="modalMsg"></p>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closeModal()">Cancel</button>
+      <button class="modal-btn confirm" id="confirmBtn" onclick="executeAction()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, collection, query, where, getDocs, doc, getDoc, deleteDoc, writeBatch, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAXVLeBN6rROvG6tEUN5WD8X1SZ4hatBxA",
+    authDomain: "nexa-co.firebaseapp.com",
+    projectId: "nexa-co",
+    storageBucket: "nexa-co.firebasestorage.app",
+    messagingSenderId: "345722583751",
+    appId: "1:345722583751:web:b987628aa77bce38629ce2"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  let currentAction = null;
+  const fu = n => (Number(n)||0).toFixed(2);
+
+  function showToast(type, title, message, duration = 4000) {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    const icons = {
+      success: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`,
+      error: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+      info: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#5c3df4" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg>`,
+      warning: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>`
+    };
+    toast.innerHTML = `
+      ${icons[type] || icons.info}
+      <div class="toast-content"><div class="toast-title">${title}</div><div class="toast-message">${message}</div></div>
+      <button class="toast-close" onclick="this.parentElement.remove()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    `;
+    container.appendChild(toast);
+    setTimeout(() => { toast.style.animation = 'slideOut 0.3s ease'; setTimeout(() => toast.remove(), 300); }, duration);
+  }
+
+  function showModal(type, title, msg, action) {
+    currentAction = action;
+    const icon = document.getElementById('modalIcon');
+    icon.className = 'modal-icon ' + (type === 'danger' ? 'danger' : 'warn');
+    icon.innerHTML = type === 'danger'
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>'
+      : '<svg viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>';
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalMsg').textContent = msg;
+    document.getElementById('modalOverlay').classList.add('show');
+  }
+
+  window.closeModal = () => {
+    document.getElementById('modalOverlay').classList.remove('show');
+    currentAction = null;
+  };
+
+  window.executeAction = async () => {
+    if (!currentAction) return;
+    const action = currentAction;
+    closeModal();
+    
+    try {
+      if (action === 'clearPending') {
+        await clearPendingTransactions();
+        showToast('success', 'Cleared!', 'All pending transactions cleared.');
+      } else if (action === 'deleteRejected') {
+        await deleteRejectedTransactions();
+        showToast('success', 'Deleted!', 'All rejected transactions deleted.');
+      } else if (action === 'eraseAll') {
+        await eraseSystem();
+        showToast('success', 'Erased!', 'System has been erased.');
+      }
+      loadStats();
+    } catch (e) {
+      console.error('Action error:', e);
+      showToast('error', 'Failed', 'Action failed: ' + e.message);
+    }
+  };
+
+  window.confirmClearPending = () => {
+    showModal('warn', 'Clear Pending Transactions?', 'This will delete ALL pending deposits and withdrawals. This cannot be undone.', 'clearPending');
+  };
+
+  window.confirmDeleteRejected = () => {
+    showModal('warn', 'Delete Rejected?', 'This will delete ALL rejected deposits and withdrawals. This cannot be undone.', 'deleteRejected');
+  };
+
+  window.confirmEraseAll = () => {
+    showModal('danger', '⚠️ ERASE ENTIRE SYSTEM?', 'This will DELETE ALL data including users, deposits, withdrawals, investments, and referral logs. This action is IRREVERSIBLE!', 'eraseAll');
+  };
+
+  async function clearPendingTransactions() {
+    const batch = writeBatch(db);
+    let count = 0;
+    
+    const depSnap = await getDocs(query(collection(db, 'deposits'), where('status', '==', 'pending')));
+    depSnap.forEach(d => { batch.delete(d.ref); count++; });
+    
+    const withSnap = await getDocs(query(collection(db, 'withdrawals'), where('status', '==', 'pending')));
+    withSnap.forEach(d => { batch.delete(d.ref); count++; });
+    
+    if (count > 0) await batch.commit();
+  }
+
+  async function deleteRejectedTransactions() {
+    const batch = writeBatch(db);
+    let count = 0;
+    
+    const depSnap = await getDocs(query(collection(db, 'deposits'), where('status', '==', 'rejected')));
+    depSnap.forEach(d => { batch.delete(d.ref); count++; });
+    
+    const withSnap = await getDocs(query(collection(db, 'withdrawals'), where('status', '==', 'rejected')));
+    withSnap.forEach(d => { batch.delete(d.ref); count++; });
+    
+    if (count > 0) await batch.commit();
+  }
+
+  async function eraseSystem() {
+    const collections = ['users', 'deposits', 'withdrawals', 'investments', 'referralLogs', 'referralCodes'];
+    
+    for (const coll of collections) {
+      const snap = await getDocs(collection(db, coll));
+      const batch = writeBatch(db);
+      let count = 0;
+      
+      snap.forEach(d => {
+        batch.delete(d.ref);
+        count++;
+        if (count >= 450) { count = 0; }
+      });
+      
+      if (count > 0) await batch.commit();
+    }
+  }
+
+  async function loadStats() {
+    try {
+      const usersSnap = await getDocs(collection(db, 'users'));
+      let totalUsers = 0;
+      usersSnap.forEach(() => totalUsers++);
+      document.getElementById('statUsers').textContent = totalUsers;
+
+      const depSnap = await getDocs(collection(db, 'deposits'));
+      let pendingDep = 0;
+      depSnap.forEach(d => { if (d.data().status === 'pending') pendingDep++; });
+      document.getElementById('statPendingDep').textContent = pendingDep;
+
+      const withSnap = await getDocs(collection(db, 'withdrawals'));
+      let pendingWith = 0;
+      withSnap.forEach(d => { if (d.data().status === 'pending') pendingWith++; });
+      document.getElementById('statPendingWith').textContent = pendingWith;
+
+      const invSnap = await getDocs(collection(db, 'investments'));
+      let totalInv = 0, totalROI = 0;
+      invSnap.forEach(d => { totalInv += d.data().amount || 0; totalROI += d.data().totalPaidOut || 0; });
+      document.getElementById('statInvestments').textContent = fu(totalInv);
+      document.getElementById('statROI').textContent = fu(totalROI);
+
+      const refSnap = await getDocs(collection(db, 'referralLogs'));
+      let totalRef = 0;
+      refSnap.forEach(d => { totalRef += d.data().bonus || 0; });
+      document.getElementById('statReferrals').textContent = fu(totalRef);
+
+      // Recent deposits
+      const recentDep = await getDocs(query(collection(db, 'deposits'), where('status', '==', 'pending')));
+      let depHtml = '';
+      recentDep.forEach(d => {
+        const data = d.data();
+        depHtml += `<div class="recent-item"><div class="ri-icon" style="background:#dcfce7;">📥</div><div class="ri-info"><div class="ri-title">${data.userEmail || 'Unknown'}</div><div class="ri-sub">${data.currency === 'NGN' ? '₦' : '$'}${data.amount} · ${data.depositType === 'NGN_BANK_TRANSFER' ? 'Bank' : 'Crypto'}</div></div><div class="ri-amount" style="color:var(--warn);">Pending</div></div>`;
+      });
+      document.getElementById('recentDeposits').innerHTML = depHtml || '<p style="font-size:0.8rem;color:var(--muted);">No pending deposits</p>';
+
+      // Recent withdrawals
+      const recentWith = await getDocs(query(collection(db, 'withdrawals'), where('status', '==', 'pending')));
+      let withHtml = '';
+      recentWith.forEach(d => {
+        const data = d.data();
+        withHtml += `<div class="recent-item"><div class="ri-icon" style="background:#fee2e2;">📤</div><div class="ri-info"><div class="ri-title">${data.userEmail || 'Unknown'}</div><div class="ri-sub">$${data.amount} · ${data.type === 'bank' ? 'Bank' : 'USDT'}</div></div><div class="ri-amount" style="color:var(--warn);">Pending</div></div>`;
+      });
+      document.getElementById('recentWithdrawals').innerHTML = withHtml || '<p style="font-size:0.8rem;color:var(--muted);">No pending withdrawals</p>';
+
+      // Recent users
+      const recentUsers = await getDocs(query(collection(db, 'users')));
+      let userHtml = '';
+      let count = 0;
+      recentUsers.forEach(d => {
+        if (count >= 5) return;
+        const data = d.data();
+        userHtml += `<div class="recent-item"><div class="ri-icon" style="background:var(--primary-soft);">👤</div><div class="ri-info"><div class="ri-title">${data.email || 'Unknown'}</div><div class="ri-sub">Joined: ${data.createdAt ? new Date(data.createdAt.toMillis()).toLocaleDateString() : '—'}</div></div><div class="ri-amount" style="color:var(--primary);">$${fu(data.withdrawalWallet || 0)}</div></div>`;
+        count++;
+      });
+      document.getElementById('recentUsers').innerHTML = userHtml || '<p style="font-size:0.8rem;color:var(--muted);">No users yet</p>';
+
+    } catch (e) {
+      console.error('Stats error:', e);
+      showToast('error', 'Error', 'Failed to load stats.');
+    }
+  }
+
+  window.handleLogout = async () => {
+    try {
+      await signOut(auth);
+      sessionStorage.removeItem('nexa_admin_logged');
+      sessionStorage.removeItem('nexa_admin_uid');
+      window.location.href = 'admin-login.html';
+    } catch (e) {
+      showToast('error', 'Error', 'Logout failed.');
+    }
+  };
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user || sessionStorage.getItem('nexa_admin_logged') !== '1') {
+      window.location.href = 'admin-login.html';
+      return;
+    }
+    
+    const userSnap = await getDoc(doc(db, 'users', user.uid));
+    const userData = userSnap.exists() ? userSnap.data() : {};
+    if (userData.role !== 'admin' && userData.isAdmin !== true) {
+      window.location.href = 'admin-login.html';
+      return;
+    }
+    
+    loadStats();
+  });
+
+  // Auto refresh every 2 minutes
+  setInterval(() => {
+    if (sessionStorage.getItem('nexa_admin_logged') === '1') loadStats();
+  }, 120000);
+</script>
+</body>
+</html>

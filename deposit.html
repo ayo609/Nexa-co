@@ -46,7 +46,6 @@
   .section-title{font-size:1rem;font-weight:800;margin-bottom:4px;}
   .section-sub{font-size:0.82rem;color:var(--muted);margin-bottom:14px;}
 
-  /* Unified amount chips with conversion */
   .amount-grid{display:flex;flex-direction:column;gap:10px;margin-bottom:14px;}
   .amount-chip{background:var(--card);border:2px solid var(--border);border-radius:16px;padding:14px 16px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:space-between;position:relative;}
   .amount-chip:hover{border-color:var(--primary);transform:translateY(-1px);}
@@ -82,7 +81,6 @@
   .timer-display{font-size:2.2rem;font-weight:800;letter-spacing:2px;font-variant-numeric:tabular-nums;}
   .timer-display.warning{color:#fca5a5;}
 
-  /* Unified payment info */
   .payment-info-card{background:var(--card);border:2px solid var(--accent-gold);border-radius:18px;padding:18px;margin-bottom:14px;text-align:center;}
   .payment-info-card .label{font-size:0.78rem;color:var(--muted);margin-bottom:4px;}
   .payment-info-card .amt{font-size:1.6rem;font-weight:800;color:var(--primary);}
@@ -145,7 +143,6 @@
 
   .btn-cancel{width:100%;padding:13px;background:transparent;color:var(--muted);font-family:inherit;font-size:0.9rem;font-weight:600;border:1.5px solid var(--border);border-radius:14px;cursor:pointer;margin-top:8px;}
 
-  /* Toast Notifications */
   .toast-container{position:fixed;top:20px;right:20px;z-index:1000;display:flex;flex-direction:column;gap:10px;max-width:350px;}
   .toast{background:var(--card);border-radius:12px;padding:14px 16px;box-shadow:0 8px 24px rgba(0,0,0,0.15);display:flex;align-items:center;gap:12px;animation:slideIn 0.3s ease;border-left:4px solid;position:relative;overflow:hidden;}
   .toast.success{border-left-color:var(--success);}
@@ -197,7 +194,7 @@
     <div class="step-dot" id="dot2"></div>
   </div>
 
-  <!-- STEP 1 - Unified Amount Selection -->
+  <!-- STEP 1 -->
   <div class="screen show" id="screen1">
     <div class="wallet-mini">
       <div><div class="label">Deposit Wallet</div><div class="amt">$<span id="walletBalance">0.00</span></div></div>
@@ -217,7 +214,7 @@
     
     <p class="min-note">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      Minimum deposit: $3.33 USDT (≈ ₦5,000 Naira)
+      Minimum deposit: $3.33 USDT (₦5,000 Naira)
     </p>
 
     <button class="btn-primary" id="proceedBtn" onclick="proceedToPayment()" disabled>
@@ -226,7 +223,7 @@
     </button>
   </div>
 
-  <!-- STEP 2 - Unified Payment Details -->
+  <!-- STEP 2 -->
   <div class="screen" id="screen2">
     <div class="timer-card">
       <div class="label">
@@ -239,7 +236,7 @@
     <div class="payment-info-card">
       <div class="label">Amount to Deposit</div>
       <div class="amt" id="payAmountDisplay">$0.00 USDT</div>
-      <div class="amt-ngn" id="payNgnDisplay">≈ ₦0 Naira</div>
+      <div class="amt-ngn" id="payNgnDisplay">₦0 Naira</div>
     </div>
 
     <div class="instruction-box">
@@ -259,7 +256,7 @@
       </div>
     </div>
 
-    <!-- USDT Wallet Details -->
+    <!-- USDT Wallet -->
     <div class="wallet-card">
       <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M8 8V6a4 4 0 018 0v2"/></svg>💎 Option 1: Send USDT (TRC20)</h3>
       <span class="network-badge">⚠️ TRC20 Network Only</span>
@@ -267,7 +264,7 @@
       <div class="wallet-row"><div><div class="l">Wallet Address</div><div class="v" style="font-size:0.72rem;">THjDGcUtThtAwP2pzmHEfLXS4pp6PjbqDT</div></div><button class="copy-btn" onclick="copyText('THjDGcUtThtAwP2pzmHEfLXS4pp6PjbqDT', this)">Copy</button></div>
     </div>
 
-    <!-- Naira Bank Details -->
+    <!-- Naira Bank -->
     <div class="wallet-card ngn-wallet">
       <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>🏦 Option 2: Bank Transfer (Naira)</h3>
       <span class="bank-badge">🏦 Send exact Naira amount</span>
@@ -278,7 +275,7 @@
 
     <div class="warn-box">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-      <p><strong>Important:</strong> Send the <strong>exact amount</strong>. For USDT, use <strong>TRC20 network only</strong>. For Naira, use the bank details above.</p>
+      <p><strong>Important:</strong> Send the <strong>exact amount</strong>. For USDT, use <strong>TRC20 network only</strong>. For Naira, transfer the exact amount to the bank account above.</p>
     </div>
 
     <div class="form-field"><label>Sender Details</label><input type="text" id="senderDetails" placeholder="Your name (as used for transfer)" oninput="validateForm()" /></div>
@@ -314,7 +311,6 @@
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  // ✅ UPDATED FIREBASE CONFIG
   const firebaseConfig = {
     apiKey: "AIzaSyAXVLeBN6rROvG6tEUN5WD8X1SZ4hatBxA",
     authDomain: "nexa-co.firebaseapp.com",
@@ -328,50 +324,36 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  // Toast notification system
   function showToast(type, title, message, duration = 4000) {
     const container = document.getElementById('toastContainer');
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
-    
     const icons = {
       success: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`,
       error: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
       info: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#5c3df4" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
       warning: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`
     };
-    
     toast.innerHTML = `
       ${icons[type] || icons.info}
-      <div class="toast-content">
-        <div class="toast-title">${title}</div>
-        <div class="toast-message">${message}</div>
-      </div>
-      <button class="toast-close" onclick="this.parentElement.remove()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
+      <div class="toast-content"><div class="toast-title">${title}</div><div class="toast-message">${message}</div></div>
+      <button class="toast-close" onclick="this.parentElement.remove()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     `;
-    
     container.appendChild(toast);
-    
-    setTimeout(() => {
-      toast.style.animation = 'slideOut 0.3s ease';
-      setTimeout(() => toast.remove(), 300);
-    }, duration);
+    setTimeout(() => { toast.style.animation = 'slideOut 0.3s ease'; setTimeout(() => toast.remove(), 300); }, duration);
   }
-
   window.showToast = showToast;
 
   const TRC20_WALLET = 'THjDGcUtThtAwP2pzmHEfLXS4pp6PjbqDT';
   const NGN_BANK = { accountNumber: '0101204119', bankName: 'Ecobank', accountName: 'Onyinye Nwaokolo' };
-  const USD_TO_NGN_RATE = 1500; // $1 = ₦1,500
 
+  // ✅ EXACT PLAN AMOUNTS WITH NAIRA CONVERSION
   const DEPOSIT_PLANS = [
-    { usd: 3.33, label: 'Starter' },
-    { usd: 10, label: 'Basic' },
-    { usd: 20, label: 'Silver' },
-    { usd: 33.33, label: 'Gold' },
-    { usd: 100, label: 'Platinum' }
+    { usd: 3.33, ngn: 5000 },
+    { usd: 10, ngn: 15000 },
+    { usd: 20, ngn: 30000 },
+    { usd: 33.33, ngn: 50000 },
+    { usd: 100, ngn: 150000 }
   ];
 
   const MIN_DEPOSIT_USD = 3.33;
@@ -379,9 +361,8 @@
 
   const fmt = n => Math.round(n || 0).toLocaleString();
   const fmtUSD = n => (n || 0).toFixed(2);
-  const usdToNgn = usd => Math.round(usd * USD_TO_NGN_RATE);
 
-  let currentUser = null, selectedAmount = 0, timerInterval = null, timeLeft = COUNTDOWN_SECONDS, compressedBase64 = null, compressedSizeKB = 0;
+  let currentUser = null, selectedAmount = 0, selectedNgnAmount = 0, timerInterval = null, timeLeft = COUNTDOWN_SECONDS, compressedBase64 = null, compressedSizeKB = 0;
 
   const ICONS = {
     success: `<svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`,
@@ -420,15 +401,14 @@
     }
   });
 
-  // Build unified amount grid
   function buildAmountGrid() {
     document.getElementById('amountGrid').innerHTML = DEPOSIT_PLANS.map(plan => `
-      <div class="amount-chip" data-amt="${plan.usd}" onclick="selectQuickAmount(${plan.usd})">
+      <div class="amount-chip" data-amt="${plan.usd}" data-ngn="${plan.ngn}" onclick="selectQuickAmount(${plan.usd}, ${plan.ngn})">
         <div class="amt-left">
           <div class="amt-icon">💎</div>
           <div>
             <span class="amt-text">$${fmtUSD(plan.usd)} USDT</span>
-            <div class="amt-sub">≈ ₦${fmt(usdToNgn(plan.usd))} Naira</div>
+            <div class="amt-sub">₦${fmt(plan.ngn)} Naira</div>
           </div>
         </div>
         <div class="check-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
@@ -436,21 +416,24 @@
     `).join('');
   }
 
-  window.selectQuickAmount = (amt) => {
-    selectedAmount = amt;
+  window.selectQuickAmount = (usd, ngn) => {
+    selectedAmount = usd;
+    selectedNgnAmount = ngn;
     document.getElementById('customAmount').value = '';
+    document.getElementById('customNgnNote').textContent = '';
     document.querySelectorAll('.amount-chip').forEach(c => {
-      c.classList.toggle('selected', Number(c.dataset.amt) === amt);
+      c.classList.toggle('selected', Number(c.dataset.amt) === usd);
     });
     validateAmount();
-    showToast('success', 'Amount Selected', `$${fmtUSD(amt)} USDT (≈ ₦${fmt(usdToNgn(amt))} Naira)`);
+    showToast('success', 'Amount Selected', `$${fmtUSD(usd)} USDT (₦${fmt(ngn)} Naira)`);
   };
 
   document.getElementById('customAmount').addEventListener('input', (e) => {
     selectedAmount = parseFloat(e.target.value) || 0;
+    selectedNgnAmount = Math.round(selectedAmount * 1500);
     document.querySelectorAll('.amount-chip').forEach(c => c.classList.remove('selected'));
-    const ngn = usdToNgn(selectedAmount);
-    document.getElementById('customNgnNote').textContent = selectedAmount > 0 ? `≈ ₦${fmt(ngn)} Naira` : '';
+    const ngn = selectedNgnAmount;
+    document.getElementById('customNgnNote').textContent = selectedAmount > 0 ? `₦${fmt(ngn)} Naira` : '';
     validateAmount();
   });
 
@@ -470,16 +453,15 @@
 
   window.proceedToPayment = () => {
     if (selectedAmount < MIN_DEPOSIT_USD) { 
-      showToast('warning', 'Minimum Amount', 'Minimum deposit is $3.33 USDT (≈ ₦5,000).');
+      showToast('warning', 'Minimum Amount', 'Minimum deposit is $3.33 USDT (₦5,000).');
       showModal('warn','Minimum','Minimum deposit required.'); 
       return; 
     }
     
-    const ngnAmount = usdToNgn(selectedAmount);
     document.getElementById('payAmountDisplay').textContent = `$${fmtUSD(selectedAmount)} USDT`;
-    document.getElementById('payNgnDisplay').textContent = `≈ ₦${fmt(ngnAmount)} Naira`;
+    document.getElementById('payNgnDisplay').textContent = `₦${fmt(selectedNgnAmount)} Naira`;
     document.getElementById('usdtAmountDisplay').textContent = `$${fmtUSD(selectedAmount)}`;
-    document.getElementById('ngnAmountDisplay').textContent = `₦${fmt(ngnAmount)}`;
+    document.getElementById('ngnAmountDisplay').textContent = `₦${fmt(selectedNgnAmount)}`;
     document.getElementById('senderDetails').value = '';
     resetUploadBox();
     validateForm();
@@ -524,6 +506,7 @@
   function resetToStep1() { 
     clearInterval(timerInterval); 
     selectedAmount = 0; 
+    selectedNgnAmount = 0;
     compressedBase64 = null; 
     document.getElementById('customAmount').value = ''; 
     document.getElementById('customNgnNote').textContent = '';
@@ -647,14 +630,13 @@
     sp.style.display = 'block';
     
     try {
-      const ngnAmount = usdToNgn(selectedAmount);
       const dd = {
         userId: currentUser.uid,
         userEmail: currentUser.email || '',
         senderDetails: senderDetails,
         amount: selectedAmount,
         usdtAmount: selectedAmount,
-        ngnEquivalent: ngnAmount,
+        ngnEquivalent: selectedNgnAmount,
         currency: 'USDT',
         receiptImage: compressedBase64,
         receiptSizeKB: compressedSizeKB,
@@ -672,8 +654,8 @@
       await addDoc(collection(db, 'deposits'), dd);
       
       clearInterval(timerInterval);
-      showToast('success', 'Deposit Submitted! 💎', `$${fmtUSD(selectedAmount)} USDT (≈ ₦${fmt(ngnAmount)}) submitted for review.`);
-      showModal('success','Submitted! 💎',`$${fmtUSD(selectedAmount)} USDT (≈ ₦${fmt(ngnAmount)} Naira) deposit submitted for review.`, () => { window.location.href = 'dashboard.html'; });
+      showToast('success', 'Deposit Submitted! 💎', `$${fmtUSD(selectedAmount)} USDT (₦${fmt(selectedNgnAmount)}) submitted for review.`);
+      showModal('success','Submitted! 💎',`$${fmtUSD(selectedAmount)} USDT (₦${fmt(selectedNgnAmount)} Naira) deposit submitted for review.`, () => { window.location.href = 'dashboard.html'; });
     } catch (err) {
       console.error(err);
       showToast('error', 'Failed', 'Could not submit deposit. Please try again.');

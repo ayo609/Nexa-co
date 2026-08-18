@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<title>Nexa – Developer Admin Setup</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{
+    --bg:#1a1533; --card:#ffffff;
+    --primary:#5c3df4; --primary-dark:#4528d4; --primary-soft:#ede9ff;
+    --accent:#a78bfa; --accent-gold:#f59e0b; --text:#1a1533; --muted:#7b7694;
+    --border:#e3e0f5; --input-bg:#f8f7ff;
+    --success:#16a34a; --error:#dc2626; --warn:#d97706;
+  }
+  body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;color:var(--text);
+    background-image:radial-gradient(ellipse at 20% 20%,rgba(92,61,244,0.15) 0%,transparent 50%),radial-gradient(ellipse at 80% 80%,rgba(167,139,250,0.1) 0%,transparent 50%);
+  }
+
+  .setup-card{background:var(--card);border-radius:24px;padding:36px 28px;max-width:460px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.4);animation:slideUp 0.4s ease;}
+  @keyframes slideUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+
+  .logo{display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:20px;}
+  .logo-icon{width:52px;height:52px;border-radius:16px;background:var(--primary);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(92,61,244,0.4);}
+  .logo-icon svg{width:26px;height:26px;color:#fff;stroke-width:2.5;}
+  .logo-text{font-size:1.6rem;font-weight:800;letter-spacing:-0.5px;}
+  .logo-text span{color:var(--primary);}
+  .logo-badge{display:inline-block;background:var(--accent-gold);color:#1e1445;font-size:0.6rem;font-weight:800;padding:3px 10px;border-radius:50px;margin-top:2px;}
+
+  h1{font-size:1.3rem;font-weight:800;text-align:center;margin-bottom:4px;}
+  .subtitle{font-size:0.85rem;color:var(--muted);text-align:center;margin-bottom:28px;}
+
+  .dev-key-box{background:var(--primary-soft);border:2px solid var(--primary);border-radius:14px;padding:16px;margin-bottom:24px;text-align:center;}
+  .dev-key-label{font-size:0.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;}
+  .dev-key-value{font-size:1.2rem;font-weight:800;color:var(--primary);font-family:monospace;letter-spacing:1px;word-break:break-all;}
+
+  .error-msg{display:none;background:#fee2e2;border:1px solid #fecaca;color:#b91c1c;border-radius:12px;padding:12px 14px;font-size:0.82rem;font-weight:600;margin-bottom:16px;align-items:center;gap:8px;}
+  .error-msg.show{display:flex;}
+  .error-msg svg{width:18px;height:18px;flex-shrink:0;}
+
+  .success-msg{display:none;background:#dcfce7;border:1px solid #bbf7d0;color:#15803d;border-radius:12px;padding:12px 14px;font-size:0.82rem;font-weight:600;margin-bottom:16px;align-items:center;gap:8px;}
+  .success-msg.show{display:flex;}
+  .success-msg svg{width:18px;height:18px;flex-shrink:0;}
+
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:0.72rem;font-weight:700;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;}
+  .field-input{position:relative;}
+  .field-input .icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#b3aed4;display:flex;pointer-events:none;}
+  .field-input .icon svg{width:18px;height:18px;}
+  .field-input input{width:100%;height:52px;background:var(--input-bg);border:2px solid var(--border);border-radius:14px;padding:0 14px 0 44px;font-family:inherit;font-size:0.92rem;color:var(--text);outline:none;transition:all 0.2s;}
+  .field-input input:focus{border-color:var(--primary);background:#fff;box-shadow:0 0 0 4px rgba(92,61,244,0.08);}
+  .field-input input.error{border-color:var(--error);background:#fef2f2;}
+  .toggle-pw{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#b3aed4;padding:6px;display:flex;}
+  .toggle-pw:hover{color:var(--primary);}
+  .toggle-pw svg{width:18px;height:18px;}
+
+  .btn-create{width:100%;height:54px;background:var(--primary);color:#fff;font-family:inherit;font-size:1rem;font-weight:700;border:none;border-radius:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s;box-shadow:0 4px 16px rgba(92,61,244,0.3);}
+  .btn-create:hover{background:var(--primary-dark);transform:translateY(-1px);box-shadow:0 6px 20px rgba(92,61,244,0.4);}
+  .btn-create:active{transform:scale(0.98);}
+  .btn-create:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+  .spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,0.35);border-top-color:#fff;border-radius:50%;animation:spin 600ms linear infinite;display:none;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .info-box{background:var(--input-bg);border:1px solid var(--border);border-radius:12px;padding:12px 14px;font-size:0.75rem;color:var(--muted);margin-top:16px;line-height:1.5;}
+  .info-box strong{color:var(--primary);}
+
+  .toast-container{position:fixed;top:20px;right:20px;z-index:1000;display:flex;flex-direction:column;gap:10px;max-width:350px;}
+  .toast{background:var(--card);border-radius:12px;padding:14px 16px;box-shadow:0 8px 24px rgba(0,0,0,0.15);display:flex;align-items:center;gap:12px;animation:slideIn 0.3s ease;border-left:4px solid;}
+  .toast.success{border-left-color:var(--success);}
+  .toast.error{border-left-color:var(--error);}
+  .toast.info{border-left-color:var(--primary);}
+  .toast.warning{border-left-color:var(--accent-gold);}
+  @keyframes slideIn{from{transform:translateX(100%);opacity:0;}to{transform:translateX(0);opacity:1;}}
+  @keyframes slideOut{from{transform:translateX(0);opacity:1;}to{transform:translateX(100%);opacity:0;}}
+  .toast-icon{width:22px;height:22px;flex-shrink:0;}
+  .toast-content{flex:1;}
+  .toast-title{font-weight:700;font-size:0.88rem;color:var(--text);margin-bottom:2px;}
+  .toast-message{font-size:0.8rem;color:var(--muted);}
+  .toast-close{background:none;border:none;cursor:pointer;color:var(--muted);padding:4px;flex-shrink:0;}
+
+  @media(max-width:480px){
+    .setup-card{padding:28px 20px;}
+    .toast-container{left:20px;right:20px;max-width:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="setup-card">
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+    </div>
+    <div>
+      <div class="logo-text">Nex<span>a</span></div>
+      <span class="logo-badge">👨‍💻 DEVELOPER SETUP</span>
+    </div>
+  </div>
+
+  <h1>Create Admin Account</h1>
+  <p class="subtitle">Developer-only access for admin creation</p>
+
+  <div class="dev-key-box">
+    <div class="dev-key-label">Developer Key Required</div>
+    <div class="dev-key-value">NEXA-DEV-2025-ADMIN-KEY</div>
+  </div>
+
+  <div class="error-msg" id="errorMsg">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span id="errorText">Invalid developer key</span>
+  </div>
+
+  <div class="success-msg" id="successMsg">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+    <span id="successText">Admin created successfully!</span>
+  </div>
+
+  <div class="field">
+    <label>Developer Key</label>
+    <div class="field-input">
+      <span class="icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      </span>
+      <input type="password" id="devKey" placeholder="Enter developer key" autocomplete="off" />
+      <button class="toggle-pw" onclick="toggleKey()" tabindex="-1" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Admin Email</label>
+    <div class="field-input">
+      <span class="icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      </span>
+      <input type="email" id="adminEmail" placeholder="admin@nexa.com" autocomplete="email" />
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Admin Password</label>
+    <div class="field-input">
+      <span class="icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      </span>
+      <input type="password" id="adminPassword" placeholder="Min 6 characters" autocomplete="new-password" />
+      <button class="toggle-pw" onclick="togglePassword()" tabindex="-1" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Confirm Password</label>
+    <div class="field-input">
+      <span class="icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      </span>
+      <input type="password" id="confirmPassword" placeholder="Repeat password" autocomplete="new-password" />
+    </div>
+  </div>
+
+  <button class="btn-create" id="createBtn" onclick="handleCreateAdmin()">
+    <span id="btnText">Create Admin Account</span>
+    <div class="spinner" id="spinner"></div>
+  </button>
+
+  <div class="info-box">
+    <strong>Security Notice:</strong> This page should only be accessed by the developer. The developer key is required to create admin accounts. Keep this key secret and change it if compromised.
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAXVLeBN6rROvG6tEUN5WD8X1SZ4hatBxA",
+    authDomain: "nexa-co.firebaseapp.com",
+    projectId: "nexa-co",
+    storageBucket: "nexa-co.firebasestorage.app",
+    messagingSenderId: "345722583751",
+    appId: "1:345722583751:web:b987628aa77bce38629ce2"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // ✅ DEVELOPER KEY - Change this to your own secret key
+  const DEVELOPER_KEY = "NEXA-DEV-2025-ADMIN-KEY";
+
+  function showToast(type, title, message, duration = 4000) {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    const icons = {
+      success: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`,
+      error: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+      info: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#5c3df4" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg>`,
+      warning: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>`
+    };
+    toast.innerHTML = `
+      ${icons[type] || icons.info}
+      <div class="toast-content"><div class="toast-title">${title}</div><div class="toast-message">${message}</div></div>
+      <button class="toast-close" onclick="this.parentElement.remove()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    `;
+    container.appendChild(toast);
+    setTimeout(() => { toast.style.animation = 'slideOut 0.3s ease'; setTimeout(() => toast.remove(), 300); }, duration);
+  }
+
+  function showError(msg) {
+    document.getElementById('errorText').textContent = msg;
+    document.getElementById('errorMsg').classList.add('show');
+    document.getElementById('successMsg').classList.remove('show');
+  }
+
+  function showSuccess(msg) {
+    document.getElementById('successText').textContent = msg;
+    document.getElementById('successMsg').classList.add('show');
+    document.getElementById('errorMsg').classList.remove('show');
+  }
+
+  function hideMessages() {
+    document.getElementById('errorMsg').classList.remove('show');
+    document.getElementById('successMsg').classList.remove('show');
+  }
+
+  function setLoading(loading) {
+    const btn = document.getElementById('createBtn');
+    const spinner = document.getElementById('spinner');
+    const btnText = document.getElementById('btnText');
+    btn.disabled = loading;
+    spinner.style.display = loading ? 'block' : 'none';
+    btnText.textContent = loading ? 'Creating Admin...' : 'Create Admin Account';
+  }
+
+  window.toggleKey = () => {
+    const input = document.getElementById('devKey');
+    input.type = input.type === 'password' ? 'text' : 'password';
+  };
+
+  window.togglePassword = () => {
+    const input = document.getElementById('adminPassword');
+    input.type = input.type === 'password' ? 'text' : 'password';
+  };
+
+  window.handleCreateAdmin = async () => {
+    const devKey = document.getElementById('devKey').value.trim();
+    const email = document.getElementById('adminEmail').value.trim();
+    const password = document.getElementById('adminPassword').value;
+    const confirm = document.getElementById('confirmPassword').value;
+
+    hideMessages();
+
+    // Validate developer key
+    if (!devKey) {
+      showError('Please enter the developer key.');
+      showToast('warning', 'Missing Key', 'Developer key is required.');
+      return;
+    }
+
+    if (devKey !== DEVELOPER_KEY) {
+      showError('Invalid developer key. Access denied.');
+      showToast('error', 'Invalid Key', 'The developer key you entered is incorrect.');
+      return;
+    }
+
+    // Validate email
+    if (!email || !email.includes('@')) {
+      showError('Please enter a valid admin email address.');
+      return;
+    }
+
+    // Validate password
+    if (!password || password.length < 6) {
+      showError('Password must be at least 6 characters.');
+      return;
+    }
+
+    if (password !== confirm) {
+      showError('Passwords do not match.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Create admin account in Firebase Auth
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      const uid = cred.user.uid;
+
+      // Save admin data in Firestore
+      await setDoc(doc(db, 'users', uid), {
+        uid: uid,
+        email: email,
+        role: 'admin',
+        isAdmin: true,
+        adminCreatedAt: serverTimestamp(),
+        createdAt: serverTimestamp(),
+        status: 'active',
+        depositWallet: 0,
+        withdrawalWallet: 0,
+        walletBalance: 0,
+        totalEarnings: 0,
+        referralBonusGiven: true,
+        referralCode: 'ADMIN' + uid.substring(0, 4).toUpperCase()
+      });
+
+      showSuccess(`Admin account created successfully! ${email} can now access the admin panel.`);
+      showToast('success', 'Admin Created! 🎉', `${email} has been granted admin access.`);
+
+      // Clear form
+      document.getElementById('devKey').value = '';
+      document.getElementById('adminEmail').value = '';
+      document.getElementById('adminPassword').value = '';
+      document.getElementById('confirmPassword').value = '';
+
+      setLoading(false);
+    } catch (e) {
+      console.error('Admin creation error:', e);
+      setLoading(false);
+
+      const errorMap = {
+        'auth/email-already-in-use': 'This email is already registered.',
+        'auth/invalid-email': 'Please enter a valid email address.',
+        'auth/weak-password': 'Password too weak. Use at least 6 characters.',
+        'auth/network-request-failed': 'Network error. Check connection.',
+        'auth/too-many-requests': 'Too many attempts. Please wait.'
+      };
+
+      showError(errorMap[e.code] || 'Failed to create admin. Please try again.');
+      showToast('error', 'Creation Failed', errorMap[e.code] || 'Could not create admin account.');
+    }
+  };
+
+  // Enter key to submit
+  document.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') handleCreateAdmin();
+  });
+
+  // Clear messages on input
+  document.getElementById('devKey').addEventListener('input', hideMessages);
+  document.getElementById('adminEmail').addEventListener('input', hideMessages);
+  document.getElementById('adminPassword').addEventListener('input', hideMessages);
+  document.getElementById('confirmPassword').addEventListener('input', hideMessages);
+</script>
+</body>
+</html>

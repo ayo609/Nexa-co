@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<title>Nexa – Admin Withdrawals</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{
+    --bg:#f4f3fa; --card:#ffffff;
+    --primary:#5c3df4; --primary-dark:#4528d4; --primary-soft:#ede9ff;
+    --accent:#a78bfa; --accent-gold:#f59e0b; --text:#1a1533; --muted:#7b7694;
+    --border:#e3e0f5; --input-bg:#f8f7ff;
+    --success:#16a34a; --error:#dc2626; --warn:#d97706;
+  }
+  body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);padding-bottom:70px;min-height:100vh;}
+
+  .topbar{background:var(--card);padding:14px 18px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;}
+  .topbar-left{display:flex;align-items:center;gap:10px;}
+  .logo-icon{width:40px;height:40px;border-radius:12px;background:var(--primary);display:flex;align-items:center;justify-content:center;}
+  .logo-icon svg{width:20px;height:20px;color:#fff;stroke-width:2.5;}
+  .logo-text{font-size:1.2rem;font-weight:800;}
+  .logo-text span{color:var(--primary);}
+  .admin-badge{background:var(--accent-gold);color:#1e1445;font-size:0.6rem;font-weight:800;padding:3px 10px;border-radius:50px;}
+  .topbar-right{display:flex;align-items:center;gap:10px;}
+  .logout-btn{background:#fee2e2;color:#b91c1c;border:none;border-radius:10px;padding:8px 16px;font-size:0.75rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:inherit;}
+  .logout-btn:hover{background:#fecaca;}
+  .logout-btn svg{width:14px;height:14px;}
+
+  main{padding:16px;max-width:900px;margin:0 auto;}
+
+  .nav-menu{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:20px;}
+  .nav-item{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:14px 8px;text-align:center;cursor:pointer;transition:all 0.2s;text-decoration:none;color:var(--text);}
+  .nav-item:hover{border-color:var(--primary);box-shadow:0 4px 12px rgba(92,61,244,0.1);}
+  .nav-item.active{background:var(--primary);border-color:var(--primary);color:#fff;}
+  .nav-item .ni-icon{font-size:1.5rem;margin-bottom:6px;}
+  .nav-item .ni-label{font-size:0.65rem;font-weight:700;}
+
+  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+  .stat-mini{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:12px;text-align:center;cursor:pointer;transition:all 0.2s;}
+  .stat-mini:hover{border-color:var(--primary);}
+  .stat-mini .sv{font-size:1.1rem;font-weight:800;color:var(--primary);}
+  .stat-mini .sl{font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px;margin-top:2px;}
+  .stat-mini.warning .sv{color:var(--warn);}
+  .stat-mini.success .sv{color:var(--success);}
+  .stat-mini.error .sv{color:var(--error);}
+
+  .filter-tabs{display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px;}
+  .filter-tabs::-webkit-scrollbar{display:none;}
+  .filter-tab{flex-shrink:0;padding:8px 16px;border-radius:50px;font-size:0.75rem;font-weight:700;cursor:pointer;background:var(--card);border:2px solid var(--border);color:var(--muted);transition:all 0.2s;white-space:nowrap;}
+  .filter-tab.active{background:var(--primary);border-color:var(--primary);color:#fff;}
+  .filter-tab:hover:not(.active){border-color:var(--primary);color:var(--primary);}
+
+  .search-bar{display:flex;gap:8px;margin-bottom:16px;}
+  .search-input{flex:1;height:44px;background:var(--card);border:2px solid var(--border);border-radius:12px;padding:0 14px;font-family:inherit;font-size:0.85rem;color:var(--text);outline:none;}
+  .search-input:focus{border-color:var(--primary);}
+
+  .withdrawal-list{display:flex;flex-direction:column;gap:10px;}
+  .withdrawal-card{background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:14px;transition:all 0.2s;}
+  .withdrawal-card:hover{border-color:var(--primary);box-shadow:0 4px 12px rgba(92,61,244,0.08);}
+  .withdrawal-card.pending{border-left:4px solid var(--warn);}
+  .withdrawal-card.approved{border-left:4px solid var(--success);}
+  .withdrawal-card.rejected{border-left:4px solid var(--error);}
+
+  .withdrawal-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .withdrawal-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
+  .withdrawal-icon.crypto{background:#dcfce7;}
+  .withdrawal-icon.bank{background:#dbeafe;}
+  .withdrawal-info{flex:1;min-width:0;}
+  .withdrawal-user{font-size:0.85rem;font-weight:700;color:var(--text);word-break:break-all;}
+  .withdrawal-date{font-size:0.7rem;color:var(--muted);margin-top:2px;}
+  .withdrawal-status{font-size:0.65rem;font-weight:700;padding:3px 10px;border-radius:50px;flex-shrink:0;}
+  .withdrawal-status.pending{background:#fef3c7;color:#92400e;}
+  .withdrawal-status.approved{background:#dcfce7;color:#15803d;}
+  .withdrawal-status.rejected{background:#fee2e2;color:#b91c1c;}
+
+  .withdrawal-details{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;}
+  .withdrawal-detail{background:var(--input-bg);border-radius:10px;padding:8px;text-align:center;}
+  .withdrawal-detail .wdl{font-size:0.6rem;color:var(--muted);text-transform:uppercase;margin-bottom:2px;}
+  .withdrawal-detail .wdv{font-size:0.78rem;font-weight:700;color:var(--text);word-break:break-all;}
+
+  .withdrawal-actions{display:flex;gap:6px;flex-wrap:wrap;}
+  .action-btn{flex:1;min-width:80px;padding:9px;border-radius:8px;font-size:0.72rem;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:4px;}
+  .action-btn svg{width:13px;height:13px;}
+  .action-btn.view{background:var(--primary-soft);color:var(--primary-dark);}
+  .action-btn.view:hover{background:#ddd6fe;}
+  .action-btn.approve{background:#dcfce7;color:#15803d;}
+  .action-btn.approve:hover{background:#bbf7d0;}
+  .action-btn.reject{background:#fee2e2;color:#b91c1c;}
+  .action-btn.reject:hover{background:#fecaca;}
+
+  .loading-state{text-align:center;padding:40px 20px;color:var(--muted);}
+  .loading-spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .empty-state{text-align:center;padding:50px 20px;color:var(--muted);}
+  .empty-state svg{width:60px;height:60px;color:var(--border);margin-bottom:16px;}
+  .empty-state h3{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:6px;}
+  .empty-state p{font-size:0.85rem;}
+
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(20,12,50,0.7);backdrop-filter:blur(6px);z-index:100;align-items:center;justify-content:center;padding:20px;}
+  .modal-overlay.show{display:flex;}
+  .modal{background:var(--card);border-radius:20px;padding:28px 22px;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:modalIn .3s ease;max-height:85vh;overflow-y:auto;text-align:center;}
+  @keyframes modalIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+  .modal h3{font-size:1.1rem;font-weight:800;margin-bottom:12px;}
+  .modal p{font-size:0.85rem;color:var(--muted);margin-bottom:16px;line-height:1.5;}
+  .detail-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed var(--border);font-size:0.82rem;text-align:left;}
+  .detail-row .l{color:var(--muted);}
+  .detail-row .v{font-weight:700;color:var(--text);text-align:right;word-break:break-all;}
+  .modal-actions{display:flex;gap:10px;margin-top:16px;}
+  .modal-btn{flex:1;padding:12px;border-radius:10px;font-size:0.85rem;font-weight:700;cursor:pointer;border:none;font-family:inherit;}
+  .modal-btn.cancel{background:var(--input-bg);color:var(--muted);border:1.5px solid var(--border);}
+  .modal-btn.confirm{background:var(--success);color:#fff;}
+  .modal-btn.danger{background:var(--error);color:#fff;}
+
+  .toast-container{position:fixed;top:20px;right:20px;z-index:1000;display:flex;flex-direction:column;gap:10px;max-width:350px;}
+  .toast{background:var(--card);border-radius:12px;padding:14px 16px;box-shadow:0 8px 24px rgba(0,0,0,0.15);display:flex;align-items:center;gap:12px;animation:slideIn 0.3s ease;border-left:4px solid;}
+  .toast.success{border-left-color:var(--success);}
+  .toast.error{border-left-color:var(--error);}
+  .toast.info{border-left-color:var(--primary);}
+  .toast.warning{border-left-color:var(--accent-gold);}
+  @keyframes slideIn{from{transform:translateX(100%);opacity:0;}to{transform:translateX(0);opacity:1;}}
+  @keyframes slideOut{from{transform:translateX(0);opacity:1;}to{transform:translateX(100%);opacity:0;}}
+  .toast-icon{width:22px;height:22px;flex-shrink:0;}
+  .toast-content{flex:1;}
+  .toast-title{font-weight:700;font-size:0.88rem;color:var(--text);margin-bottom:2px;}
+  .toast-message{font-size:0.8rem;color:var(--muted);}
+  .toast-close{background:none;border:none;cursor:pointer;color:var(--muted);padding:4px;flex-shrink:0;}
+
+  @media(max-width:768px){
+    .nav-menu{grid-template-columns:repeat(3,1fr);}
+    .stats-row{grid-template-columns:repeat(2,1fr);}
+  }
+  @media(max-width:480px){
+    .toast-container{left:20px;right:20px;max-width:none;}
+    .nav-menu{grid-template-columns:repeat(2,1fr);}
+    .withdrawal-details{grid-template-columns:repeat(2,1fr);}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+    <span class="logo-text">Nex<span>a</span></span>
+    <span class="admin-badge">🔐 ADMIN</span>
+  </div>
+  <button class="logout-btn" onclick="handleLogout()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Logout</button>
+</div>
+
+<main>
+  <div class="nav-menu">
+    <a href="admin-dashboard.html" class="nav-item"><div class="ni-icon">📊</div><div class="ni-label">Dashboard</div></a>
+    <a href="admin-users.html" class="nav-item"><div class="ni-icon">👥</div><div class="ni-label">Users</div></a>
+    <a href="admin-deposits.html" class="nav-item"><div class="ni-icon">📥</div><div class="ni-label">Deposits</div></a>
+    <a href="admin-withdrawals.html" class="nav-item active"><div class="ni-icon">📤</div><div class="ni-label">Withdrawals</div></a>
+    <a href="admin-investments.html" class="nav-item"><div class="ni-icon">💼</div><div class="ni-label">Investments</div></a>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-mini" onclick="setFilter('all')"><div class="sv" id="statTotal">0</div><div class="sl">Total</div></div>
+    <div class="stat-mini warning" onclick="setFilter('pending')"><div class="sv" id="statPending">0</div><div class="sl">Pending</div></div>
+    <div class="stat-mini success" onclick="setFilter('approved')"><div class="sv" id="statApproved">0</div><div class="sl">Approved</div></div>
+    <div class="stat-mini error" onclick="setFilter('rejected')"><div class="sv" id="statRejected">0</div><div class="sl">Rejected</div></div>
+  </div>
+
+  <div class="filter-tabs">
+    <div class="filter-tab active" data-filter="all" onclick="setFilter('all')">All</div>
+    <div class="filter-tab" data-filter="pending" onclick="setFilter('pending')">Pending</div>
+    <div class="filter-tab" data-filter="approved" onclick="setFilter('approved')">Approved</div>
+    <div class="filter-tab" data-filter="rejected" onclick="setFilter('rejected')">Rejected</div>
+  </div>
+
+  <div class="search-bar">
+    <input type="text" class="search-input" id="searchInput" placeholder="Search by user email..." oninput="filterWithdrawals()" />
+  </div>
+
+  <div class="loading-state" id="loadingState">
+    <div class="loading-spinner"></div>
+    <p>Loading withdrawals...</p>
+  </div>
+
+  <div class="withdrawal-list" id="withdrawalList" style="display:none;"></div>
+
+  <div class="empty-state" id="emptyState" style="display:none;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 12V8H6a2 2 0 010-4h12v4"/></svg>
+    <h3>No withdrawals found</h3>
+    <p id="emptyMsg">No withdrawals match your filter.</p>
+  </div>
+</main>
+
+<!-- View Details Modal -->
+<div class="modal-overlay" id="viewModal">
+  <div class="modal">
+    <h3>Withdrawal Details</h3>
+    <div id="viewContent"></div>
+    <div class="modal-actions"><button class="modal-btn cancel" onclick="closeViewModal()">Close</button></div>
+  </div>
+</div>
+
+<!-- Confirm Action Modal -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
+    <h3 id="confirmTitle">Confirm Action</h3>
+    <p id="confirmMsg">Are you sure?</p>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closeConfirmModal()">Cancel</button>
+      <button class="modal-btn confirm" id="confirmBtn" onclick="executeConfirm()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, increment, serverTimestamp, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAXVLeBN6rROvG6tEUN5WD8X1SZ4hatBxA",
+    authDomain: "nexa-co.firebaseapp.com",
+    projectId: "nexa-co",
+    storageBucket: "nexa-co.firebasestorage.app",
+    messagingSenderId: "345722583751",
+    appId: "1:345722583751:web:b987628aa77bce38629ce2"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  let allWithdrawals = [];
+  let currentFilter = 'all';
+  let selectedWithdrawal = null;
+  let confirmAction = null;
+
+  const fu = n => (Number(n)||0).toFixed(2);
+  const ff = n => Math.round(n||0).toLocaleString();
+
+  function showToast(type, title, message, duration = 4000) {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    const icons = {
+      success: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`,
+      error: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+      info: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#5c3df4" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg>`,
+      warning: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>`
+    };
+    toast.innerHTML = `
+      ${icons[type] || icons.info}
+      <div class="toast-content"><div class="toast-title">${title}</div><div class="toast-message">${message}</div></div>
+      <button class="toast-close" onclick="this.parentElement.remove()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    `;
+    container.appendChild(toast);
+    setTimeout(() => { toast.style.animation = 'slideOut 0.3s ease'; setTimeout(() => toast.remove(), 300); }, duration);
+  }
+
+  function formatDate(ts) {
+    if (!ts) return '—';
+    const d = ts.toDate ? ts.toDate() : new Date(ts);
+    return d.toLocaleDateString('en-US', {day:'numeric', month:'short', year:'numeric'}) + ' ' + d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+  }
+
+  window.setFilter = (filter) => {
+    currentFilter = filter;
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+      tab.classList.toggle('active', tab.dataset.filter === filter);
+    });
+    filterWithdrawals();
+  };
+
+  window.filterWithdrawals = () => {
+    const search = document.getElementById('searchInput').value.trim().toLowerCase();
+    let filtered = allWithdrawals;
+    
+    if (currentFilter !== 'all') {
+      filtered = filtered.filter(w => w.status === currentFilter);
+    }
+    
+    if (search) {
+      filtered = filtered.filter(w => (w.userEmail || '').toLowerCase().includes(search));
+    }
+    
+    renderWithdrawals(filtered);
+  };
+
+  function renderWithdrawals(withdrawals) {
+    const list = document.getElementById('withdrawalList');
+    const empty = document.getElementById('emptyState');
+
+    if (withdrawals.length === 0) {
+      list.style.display = 'none';
+      empty.style.display = 'block';
+      document.getElementById('emptyMsg').textContent = 'No withdrawals found.';
+      return;
+    }
+
+    empty.style.display = 'none';
+    list.style.display = 'flex';
+
+    list.innerHTML = withdrawals.map(w => {
+      const isBank = w.type === 'bank';
+      const fee = w.charge || (w.amount * 0.15);
+      const net = w.netAmount || (w.amount - fee);
+      
+      return `
+        <div class="withdrawal-card ${w.status}">
+          <div class="withdrawal-head">
+            <div class="withdrawal-icon ${isBank ? 'bank' : 'crypto'}">${isBank ? '🏦' : '💎'}</div>
+            <div class="withdrawal-info">
+              <div class="withdrawal-user">${w.userEmail || 'Unknown'}</div>
+              <div class="withdrawal-date">${formatDate(w.createdAt)}</div>
+            </div>
+            <span class="withdrawal-status ${w.status}">${w.status.charAt(0).toUpperCase() + w.status.slice(1)}</span>
+          </div>
+          <div class="withdrawal-details">
+            <div class="withdrawal-detail"><div class="wdl">Amount</div><div class="wdv">$${fu(w.amount)}</div></div>
+            <div class="withdrawal-detail"><div class="wdl">Fee (15%)</div><div class="wdv">$${fu(fee)}</div></div>
+            <div class="withdrawal-detail"><div class="wdl">Net</div><div class="wdv">$${fu(net)}</div></div>
+          </div>
+          <div class="withdrawal-actions">
+            <button class="action-btn view" onclick="viewDetails('${w.id}')">📄 Details</button>
+            ${w.status === 'pending' ? `
+              <button class="action-btn approve" onclick="confirmApprove('${w.id}')">✓ Approve</button>
+              <button class="action-btn reject" onclick="confirmReject('${w.id}')">✗ Reject</button>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  window.viewDetails = (withdrawalId) => {
+    const w = allWithdrawals.find(x => x.id === withdrawalId);
+    if (!w) return;
+    
+    const isBank = w.type === 'bank';
+    const fee = w.charge || (w.amount * 0.15);
+    const net = w.netAmount || (w.amount - fee);
+    
+    document.getElementById('viewContent').innerHTML = `
+      <div class="detail-row"><span class="l">User</span><span class="v">${w.userEmail || '—'}</span></div>
+      <div class="detail-row"><span class="l">Amount</span><span class="v">$${fu(w.amount)}</span></div>
+      <div class="detail-row"><span class="l">Fee (15%)</span><span class="v">$${fu(fee)}</span></div>
+      <div class="detail-row"><span class="l">Net Amount</span><span class="v">$${fu(net)}</span></div>
+      <div class="detail-row"><span class="l">Type</span><span class="v">${isBank ? 'Bank Transfer' : 'USDT Wallet'}</span></div>
+      ${isBank ? `
+        <div class="detail-row"><span class="l">Bank</span><span class="v">${w.bankName || '—'}</span></div>
+        <div class="detail-row"><span class="l">Account No.</span><span class="v">${w.accountNumber || '—'}</span></div>
+        <div class="detail-row"><span class="l">Account Name</span><span class="v">${w.accountName || '—'}</span></div>
+        <div class="detail-row"><span class="l">Naira Value</span><span class="v">₦${ff(net * 1500)}</span></div>
+      ` : `
+        <div class="detail-row"><span class="l">Network</span><span class="v">${w.network || 'BEP20'}</span></div>
+        <div class="detail-row"><span class="l">Wallet Address</span><span class="v">${w.walletAddress || '—'}</span></div>
+      `}
+      <div class="detail-row"><span class="l">Status</span><span class="v">${w.status.charAt(0).toUpperCase() + w.status.slice(1)}</span></div>
+      <div class="detail-row"><span class="l">Requested</span><span class="v">${formatDate(w.createdAt)}</span></div>
+    `;
+    document.getElementById('viewModal').classList.add('show');
+  };
+
+  window.closeViewModal = () => document.getElementById('viewModal').classList.remove('show');
+
+  window.confirmApprove = (withdrawalId) => {
+    selectedWithdrawal = allWithdrawals.find(w => w.id === withdrawalId);
+    confirmAction = 'approve';
+    const net = selectedWithdrawal.netAmount || (selectedWithdrawal.amount - (selectedWithdrawal.charge || selectedWithdrawal.amount * 0.15));
+    document.getElementById('confirmTitle').textContent = 'Approve Withdrawal?';
+    document.getElementById('confirmMsg').textContent = `Send $${fu(net)} to ${selectedWithdrawal.userEmail}. Confirm you have sent the funds.`;
+    document.getElementById('confirmBtn').className = 'modal-btn confirm';
+    document.getElementById('confirmBtn').style.background = 'var(--success)';
+    document.getElementById('confirmBtn').textContent = 'Approve';
+    document.getElementById('confirmModal').classList.add('show');
+  };
+
+  window.confirmReject = (withdrawalId) => {
+    selectedWithdrawal = allWithdrawals.find(w => w.id === withdrawalId);
+    confirmAction = 'reject';
+    document.getElementById('confirmTitle').textContent = 'Reject & Refund?';
+    document.getElementById('confirmMsg').textContent = `Reject $${fu(selectedWithdrawal.amount)} withdrawal from ${selectedWithdrawal.userEmail}? This will REFUND the amount to their Withdrawal Wallet.`;
+    document.getElementById('confirmBtn').className = 'modal-btn danger';
+    document.getElementById('confirmBtn').style.background = 'var(--error)';
+    document.getElementById('confirmBtn').textContent = 'Reject & Refund';
+    document.getElementById('confirmModal').classList.add('show');
+  };
+
+  window.closeConfirmModal = () => {
+    document.getElementById('confirmModal').classList.remove('show');
+    selectedWithdrawal = null;
+    confirmAction = null;
+  };
+
+  window.executeConfirm = async () => {
+    if (!selectedWithdrawal || !confirmAction) return;
+    
+    try {
+      if (confirmAction === 'approve') {
+        await updateDoc(doc(db, 'withdrawals', selectedWithdrawal.id), {
+          status: 'approved',
+          reviewed: true,
+          reviewedAt: serverTimestamp()
+        });
+        showToast('success', 'Withdrawal Approved', `$${fu(selectedWithdrawal.amount)} marked as sent.`);
+      } else {
+        // Reject & Refund
+        const userRef = doc(db, 'users', selectedWithdrawal.userId);
+        await runTransaction(db, async (tx) => {
+          const userSnap = await tx.get(userRef);
+          if (!userSnap.exists()) throw new Error('User not found');
+          
+          const currentWithdrawal = userSnap.data().withdrawalWallet || 0;
+          const currentBalance = userSnap.data().walletBalance || 0;
+          
+          tx.update(userRef, {
+            withdrawalWallet: currentWithdrawal + selectedWithdrawal.amount,
+            walletBalance: currentBalance + selectedWithdrawal.amount
+          });
+        });
+        
+        await updateDoc(doc(db, 'withdrawals', selectedWithdrawal.id), {
+          status: 'rejected',
+          reviewed: true,
+          reviewedAt: serverTimestamp()
+        });
+        
+        showToast('success', 'Withdrawal Rejected & Refunded', `$${fu(selectedWithdrawal.amount)} refunded to ${selectedWithdrawal.userEmail}.`);
+      }
+      
+      closeConfirmModal();
+      loadWithdrawals();
+    } catch (e) {
+      console.error('Withdrawal action error:', e);
+      showToast('error', 'Failed', 'Could not process withdrawal action.');
+      closeConfirmModal();
+    }
+  };
+
+  async function loadWithdrawals() {
+    const loading = document.getElementById('loadingState');
+    loading.style.display = 'block';
+    
+    try {
+      allWithdrawals = [];
+      const snap = await getDocs(collection(db, 'withdrawals'));
+      
+      snap.forEach(doc => {
+        const d = doc.data();
+        allWithdrawals.push({
+          id: doc.id,
+          userId: d.userId,
+          userEmail: d.userEmail || '',
+          amount: d.amount || 0,
+          charge: d.charge || 0,
+          netAmount: d.netAmount || 0,
+          status: d.status || 'pending',
+          createdAt: d.createdAt,
+          type: d.type || 'wallet',
+          network: d.network || 'BEP20',
+          walletAddress: d.walletAddress || '',
+          bankName: d.bankName || '',
+          accountNumber: d.accountNumber || '',
+          accountName: d.accountName || ''
+        });
+      });
+
+      allWithdrawals.sort((a, b) => {
+        const aTime = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+        const bTime = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+        return bTime - aTime;
+      });
+
+      const pending = allWithdrawals.filter(w => w.status === 'pending').length;
+      const approved = allWithdrawals.filter(w => w.status === 'approved').length;
+      const rejected = allWithdrawals.filter(w => w.status === 'rejected').length;
+      
+      document.getElementById('statTotal').textContent = allWithdrawals.length;
+      document.getElementById('statPending').textContent = pending;
+      document.getElementById('statApproved').textContent = approved;
+      document.getElementById('statRejected').textContent = rejected;
+
+      loading.style.display = 'none';
+      filterWithdrawals();
+    } catch (e) {
+      console.error('Load withdrawals error:', e);
+      loading.style.display = 'none';
+      showToast('error', 'Error', 'Failed to load withdrawals.');
+    }
+  }
+
+  window.handleLogout = async () => {
+    try {
+      await signOut(auth);
+      sessionStorage.removeItem('nexa_admin_logged');
+      sessionStorage.removeItem('nexa_admin_uid');
+      window.location.href = 'admin-login.html';
+    } catch (e) {
+      showToast('error', 'Error', 'Logout failed.');
+    }
+  };
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user || sessionStorage.getItem('nexa_admin_logged') !== '1') {
+      window.location.href = 'admin-login.html';
+      return;
+    }
+    
+    const userSnap = await getDoc(doc(db, 'users', user.uid));
+    const userData = userSnap.exists() ? userSnap.data() : {};
+    if (userData.role !== 'admin' && userData.isAdmin !== true) {
+      window.location.href = 'admin-login.html';
+      return;
+    }
+    
+    loadWithdrawals();
+  });
+
+  setInterval(() => {
+    if (sessionStorage.getItem('nexa_admin_logged') === '1') loadWithdrawals();
+  }, 120000);
+</script>
+</body>
+</html>

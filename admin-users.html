@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<title>Nexa – Admin Users</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{
+    --bg:#f4f3fa; --card:#ffffff;
+    --primary:#5c3df4; --primary-dark:#4528d4; --primary-soft:#ede9ff;
+    --accent:#a78bfa; --accent-gold:#f59e0b; --text:#1a1533; --muted:#7b7694;
+    --border:#e3e0f5; --input-bg:#f8f7ff;
+    --success:#16a34a; --error:#dc2626; --warn:#d97706;
+  }
+  body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);padding-bottom:70px;min-height:100vh;}
+
+  .topbar{background:var(--card);padding:14px 18px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;}
+  .topbar-left{display:flex;align-items:center;gap:10px;}
+  .logo-icon{width:40px;height:40px;border-radius:12px;background:var(--primary);display:flex;align-items:center;justify-content:center;}
+  .logo-icon svg{width:20px;height:20px;color:#fff;stroke-width:2.5;}
+  .logo-text{font-size:1.2rem;font-weight:800;}
+  .logo-text span{color:var(--primary);}
+  .admin-badge{background:var(--accent-gold);color:#1e1445;font-size:0.6rem;font-weight:800;padding:3px 10px;border-radius:50px;}
+  .topbar-right{display:flex;align-items:center;gap:10px;}
+  .logout-btn{background:#fee2e2;color:#b91c1c;border:none;border-radius:10px;padding:8px 16px;font-size:0.75rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:inherit;}
+  .logout-btn:hover{background:#fecaca;}
+  .logout-btn svg{width:14px;height:14px;}
+
+  main{padding:16px;max-width:900px;margin:0 auto;}
+
+  .nav-menu{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:20px;}
+  .nav-item{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:14px 8px;text-align:center;cursor:pointer;transition:all 0.2s;text-decoration:none;color:var(--text);}
+  .nav-item:hover{border-color:var(--primary);box-shadow:0 4px 12px rgba(92,61,244,0.1);}
+  .nav-item.active{background:var(--primary);border-color:var(--primary);color:#fff;}
+  .nav-item .ni-icon{font-size:1.5rem;margin-bottom:6px;}
+  .nav-item .ni-label{font-size:0.65rem;font-weight:700;}
+
+  .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+  .stat-mini{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:12px;text-align:center;}
+  .stat-mini .sv{font-size:1.2rem;font-weight:800;color:var(--primary);}
+  .stat-mini .sl{font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px;margin-top:2px;}
+
+  .search-bar{display:flex;gap:8px;margin-bottom:16px;}
+  .search-input{flex:1;height:46px;background:var(--card);border:2px solid var(--border);border-radius:12px;padding:0 14px;font-family:inherit;font-size:0.85rem;color:var(--text);outline:none;}
+  .search-input:focus{border-color:var(--primary);}
+  .search-btn{height:46px;padding:0 20px;background:var(--primary);color:#fff;border:none;border-radius:12px;font-family:inherit;font-size:0.85rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;}
+  .search-btn svg{width:16px;height:16px;}
+
+  .user-list{display:flex;flex-direction:column;gap:10px;}
+  .user-card{background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:14px;transition:all 0.2s;}
+  .user-card:hover{border-color:var(--primary);box-shadow:0 4px 12px rgba(92,61,244,0.08);}
+  .user-card.banned{background:#fef2f2;border-color:#fecaca;}
+  .user-head{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+  .user-avatar{width:44px;height:44px;border-radius:50%;background:var(--primary-soft);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;flex-shrink:0;}
+  .user-info{flex:1;min-width:0;}
+  .user-name{font-size:0.9rem;font-weight:700;color:var(--text);word-break:break-all;}
+  .user-phone{font-size:0.72rem;color:var(--muted);margin-top:2px;}
+  .user-status{font-size:0.65rem;font-weight:700;padding:3px 10px;border-radius:50px;flex-shrink:0;}
+  .user-status.active{background:#dcfce7;color:#15803d;}
+  .user-status.banned{background:#fee2e2;color:#b91c1c;}
+
+  .user-details{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;}
+  .user-detail{background:var(--input-bg);border-radius:10px;padding:8px;text-align:center;}
+  .user-detail .udl{font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:2px;}
+  .user-detail .udv{font-size:0.8rem;font-weight:700;color:var(--text);}
+
+  .user-actions{display:flex;gap:6px;flex-wrap:wrap;}
+  .action-btn{flex:1;min-width:70px;padding:8px;border-radius:8px;font-size:0.7rem;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:4px;}
+  .action-btn svg{width:12px;height:12px;}
+  .action-btn.view{background:var(--primary-soft);color:var(--primary-dark);}
+  .action-btn.view:hover{background:#ddd6fe;}
+  .action-btn.edit{background:#dbeafe;color:#1e40af;}
+  .action-btn.edit:hover{background:#bfdbfe;}
+  .action-btn.ban{background:#fef3c7;color:#92400e;}
+  .action-btn.ban:hover{background:#fde68a;}
+  .action-btn.unban{background:#dcfce7;color:#15803d;}
+  .action-btn.unban:hover{background:#bbf7d0;}
+  .action-btn.delete{background:#fee2e2;color:#b91c1c;}
+  .action-btn.delete:hover{background:#fecaca;}
+
+  .loading-state{text-align:center;padding:40px 20px;color:var(--muted);}
+  .loading-spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .empty-state{text-align:center;padding:50px 20px;color:var(--muted);}
+  .empty-state svg{width:60px;height:60px;color:var(--border);margin-bottom:16px;}
+  .empty-state h3{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:6px;}
+  .empty-state p{font-size:0.85rem;}
+
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(20,12,50,0.7);backdrop-filter:blur(6px);z-index:100;align-items:center;justify-content:center;padding:20px;}
+  .modal-overlay.show{display:flex;}
+  .modal{background:var(--card);border-radius:20px;padding:28px 22px;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:modalIn .3s ease;max-height:85vh;overflow-y:auto;}
+  @keyframes modalIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+  .modal h3{font-size:1.1rem;font-weight:800;margin-bottom:16px;text-align:center;}
+  .modal .close-x{position:absolute;top:12px;right:12px;background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--muted);}
+  
+  .detail-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px dashed var(--border);font-size:0.85rem;}
+  .detail-row .l{color:var(--muted);}
+  .detail-row .v{font-weight:700;color:var(--text);text-align:right;word-break:break-all;}
+
+  .wallet-edit{background:var(--input-bg);border-radius:12px;padding:14px;margin-bottom:12px;}
+  .wallet-edit h4{font-size:0.85rem;font-weight:700;margin-bottom:10px;}
+  .wallet-btns{display:flex;gap:6px;margin-bottom:8px;}
+  .wallet-btn{flex:1;padding:8px;border-radius:8px;font-size:0.72rem;font-weight:700;cursor:pointer;border:none;font-family:inherit;}
+  .wallet-btn.add{background:#dcfce7;color:#15803d;}
+  .wallet-btn.sub{background:#fee2e2;color:#b91c1c;}
+  .amount-input{width:100%;height:42px;background:var(--card);border:2px solid var(--border);border-radius:10px;padding:0 12px;font-family:inherit;font-size:0.85rem;outline:none;}
+
+  .modal-actions{display:flex;gap:10px;margin-top:16px;}
+  .modal-btn{flex:1;padding:12px;border-radius:10px;font-size:0.85rem;font-weight:700;cursor:pointer;border:none;font-family:inherit;}
+  .modal-btn.cancel{background:var(--input-bg);color:var(--muted);border:1.5px solid var(--border);}
+  .modal-btn.confirm{background:var(--primary);color:#fff;}
+  .modal-btn.danger{background:var(--error);color:#fff;}
+
+  .toast-container{position:fixed;top:20px;right:20px;z-index:1000;display:flex;flex-direction:column;gap:10px;max-width:350px;}
+  .toast{background:var(--card);border-radius:12px;padding:14px 16px;box-shadow:0 8px 24px rgba(0,0,0,0.15);display:flex;align-items:center;gap:12px;animation:slideIn 0.3s ease;border-left:4px solid;}
+  .toast.success{border-left-color:var(--success);}
+  .toast.error{border-left-color:var(--error);}
+  .toast.info{border-left-color:var(--primary);}
+  .toast.warning{border-left-color:var(--accent-gold);}
+  @keyframes slideIn{from{transform:translateX(100%);opacity:0;}to{transform:translateX(0);opacity:1;}}
+  @keyframes slideOut{from{transform:translateX(0);opacity:1;}to{transform:translateX(100%);opacity:0;}}
+  .toast-icon{width:22px;height:22px;flex-shrink:0;}
+  .toast-content{flex:1;}
+  .toast-title{font-weight:700;font-size:0.88rem;color:var(--text);margin-bottom:2px;}
+  .toast-message{font-size:0.8rem;color:var(--muted);}
+  .toast-close{background:none;border:none;cursor:pointer;color:var(--muted);padding:4px;flex-shrink:0;}
+
+  @media(max-width:768px){
+    .nav-menu{grid-template-columns:repeat(3,1fr);}
+    .stats-row{grid-template-columns:repeat(2,1fr);}
+  }
+  @media(max-width:480px){
+    .toast-container{left:20px;right:20px;max-width:none;}
+    .nav-menu{grid-template-columns:repeat(2,1fr);}
+    .user-details{grid-template-columns:repeat(2,1fr);}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+    <span class="logo-text">Nex<span>a</span></span>
+    <span class="admin-badge">🔐 ADMIN</span>
+  </div>
+  <button class="logout-btn" onclick="handleLogout()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Logout</button>
+</div>
+
+<main>
+  <div class="nav-menu">
+    <a href="admin-dashboard.html" class="nav-item"><div class="ni-icon">📊</div><div class="ni-label">Dashboard</div></a>
+    <a href="admin-users.html" class="nav-item active"><div class="ni-icon">👥</div><div class="ni-label">Users</div></a>
+    <a href="admin-deposits.html" class="nav-item"><div class="ni-icon">📥</div><div class="ni-label">Deposits</div></a>
+    <a href="admin-withdrawals.html" class="nav-item"><div class="ni-icon">📤</div><div class="ni-label">Withdrawals</div></a>
+    <a href="admin-investments.html" class="nav-item"><div class="ni-icon">💼</div><div class="ni-label">Investments</div></a>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-mini"><div class="sv" id="statTotal">0</div><div class="sl">Total Users</div></div>
+    <div class="stat-mini"><div class="sv" id="statActive">0</div><div class="sl">Active</div></div>
+    <div class="stat-mini"><div class="sv" id="statBanned">0</div><div class="sl">Banned</div></div>
+  </div>
+
+  <div class="search-bar">
+    <input type="text" class="search-input" id="searchInput" placeholder="Search by email or phone..." oninput="filterUsers()" />
+    <button class="search-btn" onclick="filterUsers()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Search</button>
+  </div>
+
+  <div class="loading-state" id="loadingState">
+    <div class="loading-spinner"></div>
+    <p>Loading users...</p>
+  </div>
+
+  <div class="user-list" id="userList" style="display:none;"></div>
+
+  <div class="empty-state" id="emptyState" style="display:none;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+    <h3>No users found</h3>
+    <p id="emptyMsg">No users match your search.</p>
+  </div>
+</main>
+
+<!-- View User Modal -->
+<div class="modal-overlay" id="viewModal">
+  <div class="modal">
+    <h3 id="viewTitle">User Details</h3>
+    <div id="viewContent"></div>
+    <div class="modal-actions"><button class="modal-btn cancel" onclick="closeViewModal()">Close</button></div>
+  </div>
+</div>
+
+<!-- Edit Wallet Modal -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <h3 id="editTitle">Edit Wallet</h3>
+    <div id="editContent"></div>
+  </div>
+</div>
+
+<!-- Delete Confirm Modal -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <h3>Delete User?</h3>
+    <p style="font-size:0.85rem;color:var(--muted);text-align:center;margin-bottom:16px;">This will permanently delete this user and all their data. This cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closeDeleteModal()">Cancel</button>
+      <button class="modal-btn danger" id="confirmDeleteBtn" onclick="executeDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, collection, query, where, getDocs, doc, getDoc, updateDoc, deleteDoc, writeBatch, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAXVLeBN6rROvG6tEUN5WD8X1SZ4hatBxA",
+    authDomain: "nexa-co.firebaseapp.com",
+    projectId: "nexa-co",
+    storageBucket: "nexa-co.firebasestorage.app",
+    messagingSenderId: "345722583751",
+    appId: "1:345722583751:web:b987628aa77bce38629ce2"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  let allUsers = [];
+  let selectedUser = null;
+  const fu = n => (Number(n)||0).toFixed(2);
+
+  function showToast(type, title, message, duration = 4000) {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    const icons = {
+      success: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`,
+      error: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+      info: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#5c3df4" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg>`,
+      warning: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>`
+    };
+    toast.innerHTML = `
+      ${icons[type] || icons.info}
+      <div class="toast-content"><div class="toast-title">${title}</div><div class="toast-message">${message}</div></div>
+      <button class="toast-close" onclick="this.parentElement.remove()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    `;
+    container.appendChild(toast);
+    setTimeout(() => { toast.style.animation = 'slideOut 0.3s ease'; setTimeout(() => toast.remove(), 300); }, duration);
+  }
+
+  function formatDate(ts) {
+    if (!ts) return '—';
+    const d = ts.toDate ? ts.toDate() : new Date(ts);
+    return d.toLocaleDateString('en-US', {day:'numeric', month:'short', year:'numeric'});
+  }
+
+  function renderUsers(users) {
+    const list = document.getElementById('userList');
+    const empty = document.getElementById('emptyState');
+
+    if (users.length === 0) {
+      list.style.display = 'none';
+      empty.style.display = 'block';
+      document.getElementById('emptyMsg').textContent = 'No users found.';
+      return;
+    }
+
+    empty.style.display = 'none';
+    list.style.display = 'flex';
+
+    list.innerHTML = users.map(u => {
+      const isBanned = u.status === 'banned';
+      return `
+        <div class="user-card ${isBanned ? 'banned' : ''}">
+          <div class="user-head">
+            <div class="user-avatar">${(u.email || '?').charAt(0).toUpperCase()}</div>
+            <div class="user-info">
+              <div class="user-name">${u.email || 'Unknown'}</div>
+              <div class="user-phone">📱 ${u.phone || '—'}</div>
+            </div>
+            <span class="user-status ${isBanned ? 'banned' : 'active'}">${isBanned ? 'Banned' : 'Active'}</span>
+          </div>
+          <div class="user-details">
+            <div class="user-detail"><div class="udl">Deposit</div><div class="udv">$${fu(u.depositWallet)}</div></div>
+            <div class="user-detail"><div class="udl">Withdrawal</div><div class="udv">$${fu(u.withdrawalWallet)}</div></div>
+            <div class="user-detail"><div class="udl">Ref Code</div><div class="udv">${u.referralCode || '—'}</div></div>
+          </div>
+          <div class="user-actions">
+            <button class="action-btn view" onclick="viewUser('${u.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>View</button>
+            <button class="action-btn edit" onclick="editWallet('${u.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit</button>
+            ${isBanned 
+              ? `<button class="action-btn unban" onclick="unbanUser('${u.id}')">Unban</button>` 
+              : `<button class="action-btn ban" onclick="banUser('${u.id}')">Ban</button>`}
+            <button class="action-btn delete" onclick="confirmDelete('${u.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>Delete</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  window.filterUsers = () => {
+    const search = document.getElementById('searchInput').value.trim().toLowerCase();
+    if (!search) {
+      renderUsers(allUsers);
+      return;
+    }
+    const filtered = allUsers.filter(u => 
+      (u.email || '').toLowerCase().includes(search) || 
+      (u.phone || '').toLowerCase().includes(search) ||
+      (u.referralCode || '').toLowerCase().includes(search)
+    );
+    renderUsers(filtered);
+  };
+
+  window.viewUser = (userId) => {
+    const user = allUsers.find(u => u.id === userId);
+    if (!user) return;
+    
+    document.getElementById('viewTitle').textContent = user.email || 'User Details';
+    document.getElementById('viewContent').innerHTML = `
+      <div class="detail-row"><span class="l">Email</span><span class="v">${user.email || '—'}</span></div>
+      <div class="detail-row"><span class="l">Phone</span><span class="v">${user.phone || '—'}</span></div>
+      <div class="detail-row"><span class="l">Referral Code</span><span class="v">${user.referralCode || '—'}</span></div>
+      <div class="detail-row"><span class="l">Deposit Wallet</span><span class="v">$${fu(user.depositWallet)}</span></div>
+      <div class="detail-row"><span class="l">Withdrawal Wallet</span><span class="v">$${fu(user.withdrawalWallet)}</span></div>
+      <div class="detail-row"><span class="l">Total Earnings</span><span class="v">$${fu(user.totalEarnings)}</span></div>
+      <div class="detail-row"><span class="l">Referral Earnings</span><span class="v">$${fu(user.referralEarnings)}</span></div>
+      <div class="detail-row"><span class="l">Referred By</span><span class="v">${user.referredBy || '—'}</span></div>
+      <div class="detail-row"><span class="l">Status</span><span class="v">${user.status === 'banned' ? '❌ Banned' : '✅ Active'}</span></div>
+      <div class="detail-row"><span class="l">Joined</span><span class="v">${formatDate(user.createdAt)}</span></div>
+      <div class="detail-row"><span class="l">Last Login</span><span class="v">${formatDate(user.lastLogin)}</span></div>
+    `;
+    document.getElementById('viewModal').classList.add('show');
+  };
+
+  window.closeViewModal = () => document.getElementById('viewModal').classList.remove('show');
+
+  window.editWallet = (userId) => {
+    const user = allUsers.find(u => u.id === userId);
+    if (!user) return;
+    selectedUser = user;
+    
+    document.getElementById('editTitle').textContent = `Edit Wallet - ${user.email}`;
+    document.getElementById('editContent').innerHTML = `
+      <div class="wallet-edit">
+        <h4>💰 Deposit Wallet: $${fu(user.depositWallet)}</h4>
+        <div class="wallet-btns">
+          <button class="wallet-btn add" onclick="setWalletAction('deposit', 'add')">+ Add</button>
+          <button class="wallet-btn sub" onclick="setWalletAction('deposit', 'subtract')">- Subtract</button>
+        </div>
+      </div>
+      <div class="wallet-edit">
+        <h4>💸 Withdrawal Wallet: $${fu(user.withdrawalWallet)}</h4>
+        <div class="wallet-btns">
+          <button class="wallet-btn add" onclick="setWalletAction('withdrawal', 'add')">+ Add</button>
+          <button class="wallet-btn sub" onclick="setWalletAction('withdrawal', 'subtract')">- Subtract</button>
+        </div>
+      </div>
+      <input type="number" class="amount-input" id="walletAmount" placeholder="Enter amount" step="0.01" min="0" />
+      <div class="modal-actions">
+        <button class="modal-btn cancel" onclick="closeEditModal()">Cancel</button>
+        <button class="modal-btn confirm" onclick="applyWalletEdit()">Apply</button>
+      </div>
+    `;
+    document.getElementById('editModal').classList.add('show');
+  };
+
+  window.setWalletAction = (wallet, action) => {
+    window.walletTarget = wallet;
+    window.walletAction = action;
+    showToast('info', 'Action Set', `${action === 'add' ? 'Add to' : 'Subtract from'} ${wallet} wallet. Enter amount.`);
+  };
+
+  window.applyWalletEdit = async () => {
+    const amount = parseFloat(document.getElementById('walletAmount').value) || 0;
+    if (amount <= 0) {
+      showToast('warning', 'Invalid Amount', 'Please enter a valid amount.');
+      return;
+    }
+    if (!window.walletTarget || !window.walletAction) {
+      showToast('warning', 'Select Action', 'Choose Add or Subtract for a wallet.');
+      return;
+    }
+
+    const field = window.walletTarget === 'deposit' ? 'depositWallet' : 'withdrawalWallet';
+    const change = window.walletAction === 'add' ? amount : -amount;
+
+    try {
+      await updateDoc(doc(db, 'users', selectedUser.id), {
+        [field]: increment(change),
+        walletBalance: increment(change)
+      });
+      
+      showToast('success', 'Wallet Updated', `$${fu(amount)} ${window.walletAction === 'add' ? 'added to' : 'subtracted from'} ${window.walletTarget} wallet.`);
+      closeEditModal();
+      loadUsers();
+    } catch (e) {
+      console.error('Edit wallet error:', e);
+      showToast('error', 'Failed', 'Could not update wallet.');
+    }
+  };
+
+  window.closeEditModal = () => document.getElementById('editModal').classList.remove('show');
+
+  window.banUser = async (userId) => {
+    try {
+      await updateDoc(doc(db, 'users', userId), { status: 'banned' });
+      showToast('success', 'User Banned', 'User has been banned.');
+      loadUsers();
+    } catch (e) {
+      showToast('error', 'Failed', 'Could not ban user.');
+    }
+  };
+
+  window.unbanUser = async (userId) => {
+    try {
+      await updateDoc(doc(db, 'users', userId), { status: 'active' });
+      showToast('success', 'User Unbanned', 'User has been unbanned.');
+      loadUsers();
+    } catch (e) {
+      showToast('error', 'Failed', 'Could not unban user.');
+    }
+  };
+
+  window.confirmDelete = (userId) => {
+    selectedUser = allUsers.find(u => u.id === userId);
+    document.getElementById('deleteModal').classList.add('show');
+  };
+
+  window.closeDeleteModal = () => document.getElementById('deleteModal').classList.remove('show');
+
+  window.executeDelete = async () => {
+    if (!selectedUser) return;
+    
+    try {
+      // Delete user doc
+      await deleteDoc(doc(db, 'users', selectedUser.id));
+      
+      // Delete user's deposits
+      const depSnap = await getDocs(query(collection(db, 'deposits'), where('userId', '==', selectedUser.id)));
+      const batch = writeBatch(db);
+      depSnap.forEach(d => batch.delete(d.ref));
+      
+      // Delete user's withdrawals
+      const withSnap = await getDocs(query(collection(db, 'withdrawals'), where('userId', '==', selectedUser.id)));
+      withSnap.forEach(d => batch.delete(d.ref));
+      
+      // Delete user's investments
+      const invSnap = await getDocs(query(collection(db, 'investments'), where('userId', '==', selectedUser.id)));
+      invSnap.forEach(d => batch.delete(d.ref));
+      
+      await batch.commit();
+      
+      showToast('success', 'User Deleted', 'User and all associated data removed.');
+      closeDeleteModal();
+      loadUsers();
+    } catch (e) {
+      console.error('Delete error:', e);
+      showToast('error', 'Failed', 'Could not delete user.');
+    }
+  };
+
+  async function loadUsers() {
+    const loading = document.getElementById('loadingState');
+    loading.style.display = 'block';
+    
+    try {
+      allUsers = [];
+      const snap = await getDocs(collection(db, 'users'));
+      
+      snap.forEach(doc => {
+        const d = doc.data();
+        allUsers.push({
+          id: doc.id,
+          email: d.email || '',
+          phone: d.phone || '',
+          referralCode: d.referralCode || '',
+          depositWallet: d.depositWallet || 0,
+          withdrawalWallet: d.withdrawalWallet || 0,
+          totalEarnings: d.totalEarnings || 0,
+          referralEarnings: d.referralEarnings || 0,
+          referredBy: d.referredBy || '',
+          status: d.status || 'active',
+          createdAt: d.createdAt,
+          lastLogin: d.lastLogin
+        });
+      });
+
+      // Sort by newest first
+      allUsers.sort((a, b) => {
+        const aTime = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+        const bTime = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+        return bTime - aTime;
+      });
+
+      // Update stats
+      const banned = allUsers.filter(u => u.status === 'banned').length;
+      document.getElementById('statTotal').textContent = allUsers.length;
+      document.getElementById('statActive').textContent = allUsers.length - banned;
+      document.getElementById('statBanned').textContent = banned;
+
+      loading.style.display = 'none';
+      renderUsers(allUsers);
+    } catch (e) {
+      console.error('Load users error:', e);
+      loading.style.display = 'none';
+      showToast('error', 'Error', 'Failed to load users.');
+    }
+  }
+
+  window.handleLogout = async () => {
+    try {
+      await signOut(auth);
+      sessionStorage.removeItem('nexa_admin_logged');
+      sessionStorage.removeItem('nexa_admin_uid');
+      window.location.href = 'admin-login.html';
+    } catch (e) {
+      showToast('error', 'Error', 'Logout failed.');
+    }
+  };
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user || sessionStorage.getItem('nexa_admin_logged') !== '1') {
+      window.location.href = 'admin-login.html';
+      return;
+    }
+    
+    const userSnap = await getDoc(doc(db, 'users', user.uid));
+    const userData = userSnap.exists() ? userSnap.data() : {};
+    if (userData.role !== 'admin' && userData.isAdmin !== true) {
+      window.location.href = 'admin-login.html';
+      return;
+    }
+    
+    loadUsers();
+  });
+
+  setInterval(() => {
+    if (sessionStorage.getItem('nexa_admin_logged') === '1') loadUsers();
+  }, 120000);
+</script>
+</body>
+</html>

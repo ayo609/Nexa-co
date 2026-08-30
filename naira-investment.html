@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<title>Nexa – Naira Investment</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{
+    --bg:#f4f3fa; --card:#ffffff;
+    --primary:#5c3df4; --primary-dark:#4528d4; --primary-soft:#ede9ff;
+    --accent:#a78bfa; --accent-gold:#f59e0b; --text:#1a1533; --muted:#7b7694;
+    --border:#e3e0f5; --input-bg:#f8f7ff;
+    --dark-card:linear-gradient(135deg,#1e1445 0%,#3b1fa8 100%);
+    --success:#16a34a; --error:#dc2626; --warn:#d97706;
+    --ngn-green:#0d9488;
+  }
+  body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);padding-bottom:70px;min-height:100vh;}
+
+  .topbar{background:var(--card);padding:14px 18px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;}
+  .topbar-left{display:flex;align-items:center;gap:10px;}
+  .back-btn{width:38px;height:38px;border-radius:50%;background:var(--input-bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none;color:var(--text);flex-shrink:0;}
+  .back-btn svg{width:18px;height:18px;}
+  .logo-icon{width:40px;height:40px;border-radius:12px;background:var(--primary);display:flex;align-items:center;justify-content:center;}
+  .logo-icon svg{width:20px;height:20px;color:#fff;stroke-width:2.5;}
+  .logo-text{font-size:1.2rem;font-weight:800;}
+  .logo-text span{color:var(--primary);}
+
+  main{padding:16px;max-width:600px;margin:0 auto;}
+
+  .tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px;}
+  .tab-btn{background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:12px 8px;text-align:center;cursor:pointer;font-size:0.72rem;font-weight:700;color:var(--muted);transition:all 0.2s;}
+  .tab-btn.active{background:var(--primary);border-color:var(--primary);color:#fff;}
+  .tab-btn .tab-icon{font-size:1.2rem;margin-bottom:4px;display:block;}
+
+  .screen{display:none;}
+  .screen.show{display:block;}
+
+  /* Welcome Modal */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(20,12,50,0.7);backdrop-filter:blur(6px);z-index:100;align-items:center;justify-content:center;padding:20px;}
+  .modal-overlay.show{display:flex;}
+  .modal{background:var(--card);border-radius:24px;padding:28px 22px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:modalIn .3s ease;text-align:center;max-height:85vh;overflow-y:auto;}
+  @keyframes modalIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+  .modal-icon{width:60px;height:60px;border-radius:50%;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:2rem;}
+  .modal-icon.info{background:var(--primary-soft);}
+  .modal h3{font-size:1.1rem;font-weight:800;margin-bottom:8px;}
+  .modal p{font-size:0.85rem;color:var(--muted);line-height:1.6;margin-bottom:16px;}
+  .countdown-display{font-size:1.8rem;font-weight:800;color:var(--primary);font-variant-numeric:tabular-nums;margin:10px 0;}
+  .modal-btn{width:100%;padding:14px;border:none;border-radius:12px;font-family:inherit;font-size:0.9rem;font-weight:700;cursor:pointer;transition:all 0.2s;}
+  .modal-btn.cancel{background:var(--input-bg);color:var(--muted);border:1.5px solid var(--border);}
+  .modal-btn.confirm{background:var(--primary);color:#fff;}
+
+  /* Wallet display */
+  .wallet-card{background:var(--dark-card);border-radius:16px;padding:16px;color:#fff;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;}
+  .wallet-label{font-size:0.7rem;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;}
+  .wallet-amount{font-size:1.3rem;font-weight:800;}
+
+  /* Plans */
+  .plan-card{background:var(--card);border:2px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px;text-align:center;transition:all 0.2s;}
+  .plan-card:hover{border-color:var(--primary);}
+  .plan-card.locked-plan{border-color:var(--warn);background:#fffdf5;}
+  .plan-name{font-size:1rem;font-weight:800;margin-bottom:8px;}
+  .plan-amount{font-size:1.1rem;font-weight:700;color:var(--primary);}
+  .plan-return{font-size:0.9rem;color:var(--success);font-weight:700;margin-top:4px;}
+  .plan-profit{font-size:0.75rem;color:var(--muted);margin-top:2px;}
+  .invest-btn{width:100%;margin-top:12px;padding:12px;background:var(--ngn-green);color:#fff;border:none;border-radius:10px;font-family:inherit;font-size:0.9rem;font-weight:700;cursor:pointer;}
+  .invest-btn:disabled{opacity:0.5;cursor:not-allowed;background:#9ca3af;}
+  .claim-btn{width:100%;margin-top:12px;padding:12px;background:var(--success);color:#fff;border:none;border-radius:10px;font-family:inherit;font-size:0.9rem;font-weight:700;cursor:pointer;}
+  .claim-btn:disabled{opacity:0.5;cursor:not-allowed;}
+
+  /* Lock countdown */
+  .lock-timer{background:var(--input-bg);border-radius:12px;padding:12px;text-align:center;margin-top:10px;}
+  .lock-timer .lt-label{font-size:0.7rem;color:var(--muted);margin-bottom:4px;}
+  .lock-timer .lt-display{font-size:1.2rem;font-weight:800;color:var(--warn);font-variant-numeric:tabular-nums;}
+
+  /* Purchase window */
+  .purchase-window{background:var(--primary-soft);border:1px solid #ddd6fe;border-radius:12px;padding:12px;text-align:center;margin-bottom:16px;font-size:0.8rem;color:var(--primary-dark);font-weight:600;}
+
+  /* Bank Details */
+  .bank-card{background:var(--card);border:1.5px solid var(--ngn-green);border-radius:16px;padding:16px;margin-bottom:12px;}
+  .bank-card h3{font-size:0.9rem;font-weight:700;margin-bottom:10px;color:var(--ngn-green);}
+  .bank-row{display:flex;justify-content:space-between;align-items:center;background:var(--input-bg);border-radius:10px;padding:10px 12px;margin-bottom:8px;}
+  .bank-row .bl{font-size:0.7rem;color:var(--muted);text-transform:uppercase;}
+  .bank-row .bv{font-size:0.85rem;font-weight:700;}
+  .copy-btn{background:var(--ngn-green);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:0.7rem;font-weight:700;cursor:pointer;}
+
+  .form-group{margin-bottom:12px;}
+  .form-group label{display:block;font-size:0.75rem;font-weight:600;color:var(--muted);margin-bottom:5px;text-transform:uppercase;}
+  .form-group input{width:100%;height:46px;background:var(--input-bg);border:2px solid var(--border);border-radius:10px;padding:0 12px;font-family:inherit;font-size:0.9rem;color:var(--text);outline:none;}
+  .form-group input:focus{border-color:var(--ngn-green);}
+
+  .upload-area{border:2px dashed var(--border);border-radius:12px;padding:16px;text-align:center;cursor:pointer;margin-bottom:12px;}
+  .upload-area:hover{border-color:var(--ngn-green);}
+  .upload-area .up-icon{font-size:1.5rem;margin-bottom:6px;}
+  .upload-area p{font-size:0.8rem;color:var(--muted);}
+  .preview-img{width:100%;max-height:150px;object-fit:contain;border-radius:8px;margin-top:8px;display:none;}
+
+  .submit-btn{width:100%;padding:14px;background:var(--ngn-green);color:#fff;border:none;border-radius:12px;font-family:inherit;font-size:0.95rem;font-weight:700;cursor:pointer;}
+  .submit-btn:disabled{opacity:0.5;cursor:not-allowed;}
+  .spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;display:none;margin:0 auto;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .empty-state{text-align:center;padding:40px 20px;color:var(--muted);}
+  .empty-state svg{width:50px;height:50px;color:var(--border);margin-bottom:12px;}
+  .empty-state p{font-size:0.85rem;}
+
+  .toast-container{position:fixed;top:20px;right:20px;z-index:1000;display:flex;flex-direction:column;gap:10px;max-width:350px;}
+  .toast{background:var(--card);border-radius:12px;padding:14px 16px;box-shadow:0 8px 24px rgba(0,0,0,0.15);display:flex;align-items:center;gap:12px;animation:slideIn 0.3s ease;border-left:4px solid;}
+  .toast.success{border-left-color:var(--success);}
+  .toast.error{border-left-color:var(--error);}
+  .toast.info{border-left-color:var(--primary);}
+  .toast.warning{border-left-color:var(--accent-gold);}
+  @keyframes slideIn{from{transform:translateX(100%);opacity:0;}to{transform:translateX(0);opacity:1;}}
+  @keyframes slideOut{from{transform:translateX(0);opacity:1;}to{transform:translateX(100%);opacity:0;}}
+  .toast-icon{width:22px;height:22px;flex-shrink:0;}
+  .toast-content{flex:1;}
+  .toast-title{font-weight:700;font-size:0.85rem;color:var(--text);margin-bottom:2px;}
+  .toast-message{font-size:0.78rem;color:var(--muted);}
+  .toast-close{background:none;border:none;cursor:pointer;color:var(--muted);padding:4px;flex-shrink:0;}
+
+  @media(max-width:480px){
+    .toast-container{left:20px;right:20px;max-width:none;}
+    .tabs{grid-template-columns:repeat(4,1fr);gap:4px;}
+    .tab-btn{font-size:0.65rem;padding:10px 4px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <a href="dashboard.html" class="back-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="15 18 9 12 15 6"/></svg></a>
+    <div class="logo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+    <span class="logo-text">Nex<span>a</span> <span style="font-size:0.7rem;color:var(--ngn-green);">₦ Naira</span></span>
+  </div>
+</div>
+
+<main>
+  <div class="tabs">
+    <div class="tab-btn active" data-tab="invest" onclick="switchTab('invest')"><span class="tab-icon">💰</span>Invest</div>
+    <div class="tab-btn" data-tab="myplans" onclick="switchTab('myplans')"><span class="tab-icon">📋</span>My Plans</div>
+    <div class="tab-btn" data-tab="deposit" onclick="switchTab('deposit')"><span class="tab-icon">📥</span>Deposit</div>
+    <div class="tab-btn" data-tab="withdraw" onclick="switchTab('withdraw')"><span class="tab-icon">📤</span>Withdraw</div>
+  </div>
+
+  <!-- INVEST TAB -->
+  <div class="screen show" id="screen-invest">
+    <div class="wallet-card">
+      <div>
+        <div class="wallet-label">₦ Naira Wallet</div>
+        <div class="wallet-amount">₦<span id="nairaWallet">0</span></div>
+      </div>
+      <div style="font-size:2rem;">💰</div>
+    </div>
+
+    <div class="purchase-window" id="purchaseWindow">
+      ⏰ Purchase available: Aug 31, 2026 · 8AM - 10PM
+    </div>
+
+    <div id="plansContainer"></div>
+  </div>
+
+  <!-- MY PLANS TAB -->
+  <div class="screen" id="screen-myplans">
+    <h3 style="margin-bottom:16px;text-align:center;">📋 My Naira Investments</h3>
+    <div id="myPlansContainer"></div>
+  </div>
+
+  <!-- DEPOSIT TAB -->
+  <div class="screen" id="screen-deposit">
+    <h3 style="margin-bottom:16px;text-align:center;">📥 Deposit Naira</h3>
+    <div class="bank-card">
+      <h3>🏦 Transfer to Bank Account</h3>
+      <div class="bank-row"><span class="bl">Bank</span><span class="bv">Ecobank</span><button class="copy-btn" onclick="copyText('Ecobank', this)">Copy</button></div>
+      <div class="bank-row"><span class="bl">Account Number</span><span class="bv">0101204119</span><button class="copy-btn" onclick="copyText('0101204119', this)">Copy</button></div>
+      <div class="bank-row"><span class="bl">Account Name</span><span class="bv">Onyinye Nwaokolo</span><button class="copy-btn" onclick="copyText('Onyinye Nwaokolo', this)">Copy</button></div>
+    </div>
+
+    <div class="form-group">
+      <label>Amount (₦)</label>
+      <input type="number" id="depositAmount" placeholder="Enter amount in Naira" min="1000" step="100" />
+    </div>
+
+    <div class="form-group">
+      <label>Sender Details</label>
+      <input type="text" id="senderName" placeholder="Your name (as used for transfer)" />
+    </div>
+
+    <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+      <div class="up-icon">📷</div>
+      <p><strong>Tap to upload receipt</strong><br/>JPG or PNG - auto-compressed</p>
+      <input type="file" id="fileInput" accept="image/*" style="display:none;" />
+    </div>
+    <img id="previewImage" class="preview-img" alt="Receipt Preview" />
+    <button class="remove-btn" id="removeBtn" style="display:none;background:#fee2e2;color:#b91c1c;border:none;border-radius:8px;padding:6px 12px;font-size:0.75rem;font-weight:700;cursor:pointer;margin-bottom:10px;" onclick="removeReceipt()">Remove Receipt</button>
+
+    <button class="submit-btn" id="depositSubmitBtn" onclick="submitDeposit()">
+      <span id="depositBtnText">Submit Deposit Request</span>
+      <div class="spinner" id="depositSpinner"></div>
+    </button>
+  </div>
+
+  <!-- WITHDRAW TAB -->
+  <div class="screen" id="screen-withdraw">
+    <h3 style="margin-bottom:16px;text-align:center;">📤 Withdraw Naira</h3>
+    <div class="wallet-card">
+      <div>
+        <div class="wallet-label">₦ Withdrawal Wallet</div>
+        <div class="wallet-amount">₦<span id="nairaWithdrawalWallet">0</span></div>
+      </div>
+      <div style="font-size:2rem;">💸</div>
+    </div>
+
+    <div class="form-group">
+      <label>Amount (₦)</label>
+      <input type="number" id="withdrawAmount" placeholder="Enter amount" min="1000" step="100" />
+    </div>
+
+    <div class="form-group">
+      <label>Bank</label>
+      <select id="withdrawBank" style="width:100%;height:46px;background:var(--input-bg);border:2px solid var(--border);border-radius:10px;padding:0 12px;font-family:inherit;font-size:0.9rem;color:var(--text);outline:none;">
+        <option value="">Select bank</option>
+        <option>Access Bank</option><option>GTBank</option><option>Zenith Bank</option><option>UBA</option><option>First Bank</option><option>Kuda Bank</option><option>Opay</option><option>Palmpay</option><option>Moniepoint</option><option>Ecobank</option><option>Fidelity Bank</option><option>Sterling Bank</option><option>Union Bank</option><option>Wema Bank</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Account Number</label>
+      <input type="text" id="withdrawAccount" placeholder="10 digits" maxlength="10" />
+    </div>
+
+    <div class="form-group">
+      <label>Account Name</label>
+      <input type="text" id="withdrawName" placeholder="Your full name" />
+    </div>
+
+    <button class="submit-btn" id="withdrawSubmitBtn" onclick="submitWithdrawal()">
+      <span id="withdrawBtnText">Submit Withdrawal Request</span>
+      <div class="spinner" id="withdrawSpinner"></div>
+    </button>
+  </div>
+</main>
+
+<!-- Welcome Modal -->
+<div class="modal-overlay" id="welcomeModal">
+  <div class="modal">
+    <div class="modal-icon info">⏰</div>
+    <h3>Purchase Not Open Yet</h3>
+    <p>Naira investment plans will be available for purchase on:</p>
+    <div class="countdown-display" id="welcomeCountdown">--:--:--</div>
+    <p><strong>August 31, 2026</strong><br/>8:00 AM - 10:00 PM</p>
+    <button class="modal-btn confirm" onclick="closeWelcomeModal()">OK, I Understand</button>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, collection, query, where, getDocs, doc, getDoc, updateDoc, addDoc, serverTimestamp, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAXVLeBN6rROvG6tEUN5WD8X1SZ4hatBxA",
+    authDomain: "nexa-co.firebaseapp.com",
+    projectId: "nexa-co",
+    storageBucket: "nexa-co.firebasestorage.app",
+    messagingSenderId: "345722583751",
+    appId: "1:345722583751:web:b987628aa77bce38629ce2"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const NAIRA_PLANS = [
+    { id: 'starter', name: 'Starter Plan', invest: 50000, return: 75000, profit: 25000 },
+    { id: 'standard', name: 'Standard Plan', invest: 100000, return: 150000, profit: 50000 },
+    { id: 'premium', name: 'Premium Plan', invest: 200000, return: 300000, profit: 100000 }
+  ];
+
+  const LOCK_DAYS = 5;
+  const PURCHASE_DATE = new Date('2026-08-31T08:00:00');
+  const PURCHASE_END = new Date('2026-08-31T22:00:00');
+  const NGN_BANK = { bankName: 'Ecobank', accountNumber: '0101204119', accountName: 'Onyinye Nwaokolo' };
+
+  let currentUser = null;
+  let nairaWallet = 0;
+  let nairaWithdrawalWallet = 0;
+  let uploadedReceipt = null;
+
+  const ff = n => Math.round(n||0).toLocaleString();
+
+  function showToast(type, title, message, duration = 4000) {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    const icons = {
+      success: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`,
+      error: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+      info: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#5c3df4" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg>`,
+      warning: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>`
+    };
+    toast.innerHTML = `
+      ${icons[type] || icons.info}
+      <div class="toast-content"><div class="toast-title">${title}</div><div class="toast-message">${message}</div></div>
+      <button class="toast-close" onclick="this.parentElement.remove()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    `;
+    container.appendChild(toast);
+    setTimeout(() => { toast.style.animation = 'slideOut 0.3s ease'; setTimeout(() => toast.remove(), 300); }, duration);
+  }
+
+  window.copyText = (text, btn) => {
+    navigator.clipboard.writeText(text).then(() => {
+      const original = btn.textContent;
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = original, 1500);
+      showToast('success', 'Copied!', 'Copied to clipboard.');
+    });
+  };
+
+  window.switchTab = (tab) => {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('show'));
+    document.getElementById('screen-' + tab).classList.add('show');
+    
+    if (tab === 'myplans') loadMyPlans();
+    if (tab === 'withdraw') updateWithdrawWallet();
+  };
+
+  window.closeWelcomeModal = () => {
+    document.getElementById('welcomeModal').classList.remove('show');
+    sessionStorage.setItem('naira_welcome_shown', '1');
+  };
+
+  function isPurchaseOpen() {
+    const now = new Date();
+    return now >= PURCHASE_DATE && now <= PURCHASE_END;
+  }
+
+  function isPurchaseExpired() {
+    return new Date() > PURCHASE_END;
+  }
+
+  function updatePurchaseWindow() {
+    const now = new Date();
+    const windowEl = document.getElementById('purchaseWindow');
+    
+    if (now < PURCHASE_DATE) {
+      const diff = PURCHASE_DATE - now;
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+      windowEl.innerHTML = `⏰ Purchase opens in: <strong>${days}d ${hours}h ${minutes}m ${seconds}s</strong>`;
+      
+      // Show welcome modal on first visit
+      if (!sessionStorage.getItem('naira_welcome_shown')) {
+        document.getElementById('welcomeCountdown').textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+        document.getElementById('welcomeModal').classList.add('show');
+      }
+    } else if (isPurchaseOpen()) {
+      const diff = PURCHASE_END - now;
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      windowEl.innerHTML = `✅ <strong>Purchase OPEN!</strong> Time remaining: ${hours}h ${minutes}m`;
+    } else {
+      windowEl.innerHTML = `❌ <strong>Purchase window closed.</strong> Try your luck next time!`;
+    }
+  }
+
+  function renderPlans() {
+    const container = document.getElementById('plansContainer');
+    const canPurchase = isPurchaseOpen() && !isPurchaseExpired();
+    
+    container.innerHTML = NAIRA_PLANS.map(plan => `
+      <div class="plan-card ${!canPurchase ? 'locked-plan' : ''}">
+        <div class="plan-name">${plan.name}</div>
+        <div class="plan-amount">Invest: ₦${ff(plan.invest)}</div>
+        <div class="plan-return">Return: ₦${ff(plan.return)}</div>
+        <div class="plan-profit">Profit: ₦${ff(plan.profit)} (50%)</div>
+        <div style="font-size:0.75rem;color:var(--muted);margin-top:4px;">🔒 Locked for 5 days</div>
+        <button class="invest-btn" ${!canPurchase ? 'disabled' : ''} onclick="investPlan('${plan.id}')">
+          ${canPurchase ? 'Invest ₦' + ff(plan.invest) : '🔒 Not Available'}
+        </button>
+      </div>
+    `).join('');
+  }
+
+  window.investPlan = async (planId) => {
+    const plan = NAIRA_PLANS.find(p => p.id === planId);
+    if (!plan) return;
+    
+    if (!isPurchaseOpen()) {
+      showToast('error', 'Not Open', 'Purchase window is not open yet.');
+      return;
+    }
+    
+    if (nairaWallet < plan.invest) {
+      showToast('error', 'Insufficient Balance', `You need ₦${ff(plan.invest)} in your Naira wallet. Please deposit first.`);
+      return;
+    }
+
+    try {
+      // Deduct from naira wallet
+      const userRef = doc(db, 'users', currentUser.uid);
+      await runTransaction(db, async (tx) => {
+        const userSnap = await tx.get(userRef);
+        const currentNaira = userSnap.data().nairaWallet || 0;
+        if (currentNaira < plan.invest) throw new Error('INSUFFICIENT');
+        tx.update(userRef, { nairaWallet: currentNaira - plan.invest });
+      });
+
+      // Create naira investment
+      const lockEnd = new Date();
+      lockEnd.setDate(lockEnd.getDate() + LOCK_DAYS);
+
+      await addDoc(collection(db, 'nairaInvestments'), {
+        userId: currentUser.uid,
+        userEmail: currentUser.email || '',
+        planId: plan.id,
+        planName: plan.name,
+        investAmount: plan.invest,
+        returnAmount: plan.return,
+        profitAmount: plan.profit,
+        status: 'locked',
+        lockedAt: serverTimestamp(),
+        unlockAt: lockEnd,
+        claimedAt: null,
+        createdAt: serverTimestamp(),
+        noReferralBonus: true
+      });
+
+      showToast('success', 'Investment Started! 🎉', `${plan.name} activated. ₦${ff(plan.invest)} locked for 5 days.`);
+      loadWallets();
+      loadMyPlans();
+      switchTab('myplans');
+    } catch (e) {
+      if (e.message === 'INSUFFICIENT') {
+        showToast('error', 'Insufficient', 'Not enough Naira balance.');
+      } else {
+        showToast('error', 'Failed', 'Could not start investment.');
+      }
+    }
+  };
+
+  async function loadMyPlans() {
+    if (!currentUser) return;
+    const container = document.getElementById('myPlansContainer');
+    
+    try {
+      const snap = await getDocs(query(collection(db, 'nairaInvestments'), where('userId', '==', currentUser.uid)));
+      
+      if (snap.empty) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/></svg>
+            <p>No naira investments yet.<br/>Invest to get started!</p>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      snap.forEach(doc => {
+        const inv = doc.data();
+        const now = new Date();
+        const unlockDate = inv.unlockAt?.toDate ? inv.unlockAt.toDate() : new Date(inv.unlockAt);
+        
+        if (inv.status === 'locked' && now >= unlockDate) {
+          inv.status = 'ready';
+          updateDoc(doc.ref, { status: 'ready' });
+        }
+
+        if (inv.status === 'locked') {
+          const diff = unlockDate - now;
+          const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+          
+          html += `
+            <div class="plan-card locked-plan">
+              <div class="plan-name">${inv.planName}</div>
+              <div class="plan-amount">Invested: ₦${ff(inv.investAmount)}</div>
+              <div class="plan-return">Return: ₦${ff(inv.returnAmount)}</div>
+              <div class="lock-timer">
+                <div class="lt-label">🔒 Unlocks in</div>
+                <div class="lt-display">${days}d ${hours}h ${minutes}m</div>
+              </div>
+            </div>
+          `;
+        } else if (inv.status === 'ready') {
+          html += `
+            <div class="plan-card" style="border-color:var(--success);">
+              <div class="plan-name">${inv.planName}</div>
+              <div class="plan-amount">Invested: ₦${ff(inv.investAmount)}</div>
+              <div class="plan-return">Return: ₦${ff(inv.returnAmount)}</div>
+              <div class="plan-profit" style="color:var(--success);font-weight:700;">✅ Ready to Claim!</div>
+              <button class="claim-btn" onclick="claimROI('${doc.id}')">CLAIM ₦${ff(inv.returnAmount)}</button>
+            </div>
+          `;
+        } else if (inv.status === 'claimed') {
+          html += `
+            <div class="plan-card" style="border-color:var(--primary-soft);opacity:0.7;">
+              <div class="plan-name">${inv.planName}</div>
+              <div class="plan-amount">Invested: ₦${ff(inv.investAmount)}</div>
+              <div class="plan-return">Return: ₦${ff(inv.returnAmount)}</div>
+              <div class="plan-profit">✅ Claimed!</div>
+            </div>
+          `;
+        }
+      });
+
+      container.innerHTML = html;
+    } catch (e) {
+      console.error('Load plans error:', e);
+      container.innerHTML = '<p style="text-align:center;color:var(--error);font-size:0.85rem;">Failed to load plans.</p>';
+    }
+  }
+
+  window.claimROI = async (investmentId) => {
+    try {
+      const invRef = doc(db, 'nairaInvestments', investmentId);
+      const invSnap = await getDoc(invRef);
+      
+      if (!invSnap.exists()) {
+        showToast('error', 'Not Found', 'Investment not found.');
+        return;
+      }
+      
+      const inv = invSnap.data();
+      
+      if (inv.status !== 'ready') {
+        showToast('warning', 'Not Ready', 'Investment is not ready to claim yet.');
+        return;
+      }
+
+      // Credit to naira withdrawal wallet
+      const userRef = doc(db, 'users', currentUser.uid);
+      await runTransaction(db, async (tx) => {
+        const userSnap = await tx.get(userRef);
+        const currentWithdrawal = userSnap.data().nairaWithdrawalWallet || 0;
+        tx.update(userRef, { nairaWithdrawalWallet: currentWithdrawal + inv.returnAmount });
+      });
+
+      // Update investment status
+      await updateDoc(invRef, {
+        status: 'claimed',
+        claimedAt: serverTimestamp()
+      });
+
+      showToast('success', 'Claimed! 🎉', `₦${ff(inv.returnAmount)} has been credited to your Withdrawal Wallet!`);
+      loadMyPlans();
+      updateWithdrawWallet();
+    } catch (e) {
+      console.error('Claim error:', e);
+      showToast('error', 'Failed', 'Could not claim ROI.');
+    }
+  };
+
+  // File upload
+  document.getElementById('fileInput').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      showToast('error', 'Invalid File', 'Please upload an image file.');
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      showToast('error', 'File Too Large', 'Maximum file size is 10MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const maxDim = 800;
+        let w = img.width, h = img.height;
+        if (w > maxDim || h > maxDim) {
+          if (w > h) { h = (maxDim / w) * h; w = maxDim; }
+          else { w = (maxDim / h) * w; h = maxDim; }
+        }
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        
+        let quality = 0.6;
+        uploadedReceipt = canvas.toDataURL('image/jpeg', quality);
+        while (uploadedReceipt.length > 500000 && quality > 0.2) {
+          quality -= 0.1;
+          uploadedReceipt = canvas.toDataURL('image/jpeg', quality);
+        }
+
+        document.getElementById('previewImage').src = uploadedReceipt;
+        document.getElementById('previewImage').style.display = 'block';
+        document.getElementById('removeBtn').style.display = 'block';
+        document.getElementById('uploadArea').style.display = 'none';
+        
+        const sizeKB = (uploadedReceipt.length * 0.75 / 1024).toFixed(1);
+        showToast('success', 'Receipt Uploaded', `Image compressed to ${sizeKB} KB.`);
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  window.removeReceipt = function() {
+    uploadedReceipt = null;
+    document.getElementById('fileInput').value = '';
+    document.getElementById('previewImage').style.display = 'none';
+    document.getElementById('removeBtn').style.display = 'none';
+    document.getElementById('uploadArea').style.display = 'block';
+  };
+
+  window.submitDeposit = async function() {
+    const amount = parseFloat(document.getElementById('depositAmount').value) || 0;
+    const senderName = document.getElementById('senderName').value.trim();
+
+    if (amount < 1000) {
+      showToast('warning', 'Invalid Amount', 'Minimum deposit is ₦1,000.');
+      return;
+    }
+    if (!senderName) {
+      showToast('warning', 'Missing Info', 'Please enter sender details.');
+      return;
+    }
+    if (!uploadedReceipt) {
+      showToast('warning', 'Missing Receipt', 'Please upload payment receipt.');
+      return;
+    }
+
+    const btn = document.getElementById('depositSubmitBtn');
+    const text = document.getElementById('depositBtnText');
+    const spinner = document.getElementById('depositSpinner');
+    btn.disabled = true;
+    text.textContent = 'Submitting...';
+    spinner.style.display = 'block';
+
+    try {
+      await addDoc(collection(db, 'nairaDeposits'), {
+        userId: currentUser.uid,
+        userEmail: currentUser.email || '',
+        senderName: senderName,
+        amount: amount,
+        receiptImage: uploadedReceipt,
+        bankName: NGN_BANK.bankName,
+        accountNumber: NGN_BANK.accountNumber,
+        accountName: NGN_BANK.accountName,
+        status: 'pending',
+        reviewed: false,
+        createdAt: serverTimestamp(),
+        depositType: 'NAIRA_INVESTMENT_DEPOSIT'
+      });
+
+      spinner.style.display = 'none';
+      btn.disabled = false;
+      text.textContent = 'Submit Deposit Request';
+      
+      document.getElementById('depositAmount').value = '';
+      document.getElementById('senderName').value = '';
+      removeReceipt();
+
+      showToast('success', 'Deposit Submitted! 🎉', 'Your deposit request has been sent for verification.');
+    } catch (e) {
+      console.error('Deposit error:', e);
+      spinner.style.display = 'none';
+      btn.disabled = false;
+      text.textContent = 'Submit Deposit Request';
+      showToast('error', 'Failed', 'Could not submit deposit.');
+    }
+  };
+
+  function updateWithdrawWallet() {
+    document.getElementById('nairaWithdrawalWallet').textContent = ff(nairaWithdrawalWallet);
+  }
+
+  window.submitWithdrawal = async function() {
+    const amount = parseFloat(document.getElementById('withdrawAmount').value) || 0;
+    const bank = document.getElementById('withdrawBank').value;
+    const account = document.getElementById('withdrawAccount').value.trim();
+    const name = document.getElementById('withdrawName').value.trim();
+
+    if (amount < 1000) {
+      showToast('warning', 'Invalid Amount', 'Minimum withdrawal is ₦1,000.');
+      return;
+    }
+    if (amount > nairaWithdrawalWallet) {
+      showToast('error', 'Insufficient', `Your withdrawal wallet balance is ₦${ff(nairaWithdrawalWallet)}.`);
+      return;
+    }
+    if (!bank) {
+      showToast('warning', 'Missing Info', 'Please select a bank.');
+      return;
+    }
+    if (account.length !== 10) {
+      showToast('warning', 'Invalid Account', 'Enter 10-digit account number.');
+      return;
+    }
+    if (name.length < 3) {
+      showToast('warning', 'Missing Info', 'Enter account name.');
+      return;
+    }
+
+    const btn = document.getElementById('withdrawSubmitBtn');
+    const text = document.getElementById('withdrawBtnText');
+    const spinner = document.getElementById('withdrawSpinner');
+    btn.disabled = true;
+    text.textContent = 'Submitting...';
+    spinner.style.display = 'block';
+
+    try {
+      const userRef = doc(db, 'users', currentUser.uid);
+      await runTransaction(db, async (tx) => {
+        const userSnap = await tx.get(userRef);
+        const current = userSnap.data().nairaWithdrawalWallet || 0;
+        if (current < amount) throw new Error('INSUFFICIENT');
+        tx.update(userRef, { nairaWithdrawalWallet: current - amount });
+      });
+
+      await addDoc(collection(db, 'nairaWithdrawals'), {
+        userId: currentUser.uid,
+        userEmail: currentUser.email || '',
+        amount: amount,
+        bankName: bank,
+        accountNumber: account,
+        accountName: name,
+        status: 'pending',
+        createdAt: serverTimestamp(),
+        withdrawalType: 'NAIRA_INVESTMENT_WITHDRAWAL'
+      });
+
+      spinner.style.display = 'none';
+      btn.disabled = false;
+      text.textContent = 'Submit Withdrawal Request';
+      
+      document.getElementById('withdrawAmount').value = '';
+      document.getElementById('withdrawBank').value = '';
+      document.getElementById('withdrawAccount').value = '';
+      document.getElementById('withdrawName').value = '';
+
+      nairaWithdrawalWallet -= amount;
+      updateWithdrawWallet();
+
+      showToast('success', 'Withdrawal Submitted! 🎉', 'Your withdrawal request has been sent for approval.');
+    } catch (e) {
+      spinner.style.display = 'none';
+      btn.disabled = false;
+      text.textContent = 'Submit Withdrawal Request';
+      if (e.message === 'INSUFFICIENT') {
+        showToast('error', 'Insufficient', 'Not enough withdrawal balance.');
+      } else {
+        showToast('error', 'Failed', 'Could not submit withdrawal.');
+      }
+    }
+  };
+
+  async function loadWallets() {
+    if (!currentUser) return;
+    try {
+      const userSnap = await getDoc(doc(db, 'users', currentUser.uid));
+      if (userSnap.exists()) {
+        const data = userSnap.data();
+        nairaWallet = data.nairaWallet || 0;
+        nairaWithdrawalWallet = data.nairaWithdrawalWallet || 0;
+        document.getElementById('nairaWallet').textContent = ff(nairaWallet);
+        document.getElementById('nairaWithdrawalWallet').textContent = ff(nairaWithdrawalWallet);
+      }
+    } catch (e) {
+      console.error('Load wallets error:', e);
+    }
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = 'login.html';
+      return;
+    }
+    currentUser = user;
+    await loadWallets();
+    updatePurchaseWindow();
+    renderPlans();
+  });
+
+  // Update countdown every second
+  setInterval(() => {
+    updatePurchaseWindow();
+    renderPlans();
+    if (document.getElementById('screen-myplans').classList.contains('show')) {
+      loadMyPlans();
+    }
+  }, 1000);
+</script>
+
+</body>
+</html>
